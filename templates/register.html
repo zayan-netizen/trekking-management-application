@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Register | Trekking Management App
+        </title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+
+    <body class="bg-dark text-white">
+        <header class="border-bottom fixed-top z-3 bg-dark bg-opacity-95">
+            <h5 class="m-3 container d-grid">Trekking Management Application</h5>
+        </header>
+
+        <main class="container d-flex justify-content-center p-4 card shadow" style="margin-top: 7rem; width: 500px;">
+
+            <h2 class="text-center m-3">Register</h2>
+            <div class="border m-4 mb-5"></div>
+            <form action="{{ url_for('register') }}" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">
+                        Username
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="username"
+                        id="username"
+                        minlength="3"
+                        maxlength="12"
+                        placeholder="username"
+                        value="{{ username or ''}}"
+                        required
+                        >
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        Email
+                    </label>
+                    <input 
+                        type="email"
+                        id="email"
+                        class="form-control"
+                        name="email"
+                        placeholder="username@gmail.com"
+                        value="{{ email or ''}}"
+                        required
+                        >
+                    </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        required
+                        minlength="8"
+                        maxlength="30"
+                        class="form-control"
+                        placeholder="password"
+                        >
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirm-password" class="form-label">Re-enter Password</label>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        required
+                        minlength="8"
+                        maxlength="30"
+                        placeholder="re-password"
+                        class="form-control"
+                        name="confirm_password"
+                        >
+                </div>
+
+                <div class="mb-3">
+                    <label for="f_name" class="form-label">First Name</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="John"
+                        id="f_name"
+                        name="first_name"
+                        value="{{ first_name or ''}}"
+                        required
+                        >
+                </div>
+
+                <div class="mb-3">
+                    <label for="l_name" class="form-label">Last Name</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Doe"
+                        id="l_name"
+                        name="last_name"
+                        value="{{ last_name or ''}}"
+                        required
+                        >
+                </div>
+
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input
+                        type="tel"
+                        class="form-control"
+                        name="phone"
+                        pattern="[0-9]{10}"
+                        placeholder="97xx00xx12"
+                        value="{{ phone or '' }}"
+                        required
+                        >
+                </div>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-control form-select" id="role" name="role" required>
+                        <option value="" selected disabled>User/Staff</option>
+                        <option value="Trekker">Trekker</option>
+                        <option value="Trek Staff">Trek Staff</option>
+                        <option value="Admin" disabled>Admin</option>
+                    </select>
+                </div>
+
+                <div class="mb-3" id="staff-fields" style="display: none;">
+
+
+                    <div class="mb-3">
+                        <label>Experience</label>
+                        <input type="text" class="form-control" name="experience" value="{{experience or ''}}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Qualification</label>
+                        <input type="text" class="form-control" name="qualification" value="{{qualification or ''}}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Specialization</label>
+                        <input type="text" class="form-control" name="specialization" value="{{specialization or ''}}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Address</label>
+                        <input type="text" class="form-control" name="address" value="{{address or ''}}">
+                    </div>
+
+                </div>
+                
+                {% if errors %}
+                    {% for error in errors %}
+                        <div class="alert alert-danger m-2">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if success %}
+                    <div class="alert alert-success">
+                        {{ success }}
+                    </div>
+                {% endif %}
+
+                <div class="container mt-5 d-grid">
+                    <button type="submit" class="btn btn-success">
+                        Register
+                    </button>
+                </div>
+
+                <div class="m-5 mb-1 container d-flex justify-content-center row">
+                    <p class="col-5 text-center">Already Registered ?</p>
+                    <a href="{{ url_for('login') }}" class="col link-offset-2 link-primary text-center">Login</a>
+                </div>
+
+            </form>
+        </main>
+    </body>
+
+    <script src="{{ url_for('static', filename='logic.js') }}"></script>
+
+</html>

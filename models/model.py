@@ -254,11 +254,6 @@ class StaffProfile(db.Model):
         nullable = False
     )
 
-    contact_number = db.Column(
-        db.String(10),
-        nullable = False
-    )
-
     address = db.Column(
         db.String(255),
         nullable = False,
@@ -267,12 +262,7 @@ class StaffProfile(db.Model):
     joining_date = db.Column(
         db.DateTime,
         default = datetime.utcnow,
-        nullable = False
-    )
-
-    status = db.Column(
-        db.String(30),
-        nullable = False
+        nullable = True
     )
 
     updated_at = db.Column(
