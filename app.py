@@ -9,9 +9,11 @@ from models.model import db, User, Trek, Booking, StaffProfile
 from create_admin import create_admin_is_not_created
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from datetime import datetime
+from sqlalchemy import or_
 
-#Initialized a Flask application
-app = Flask(__name__)
+#Initialized a Flask application and tells the whole application to run w.r.t the content of the instance folder or db files.
+app = Flask(__name__, instance_relative_config=True)
 
 #Configuarations for the database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///trek.db"
@@ -57,7 +59,7 @@ def register():
     errors = []
 
     if request.method == "GET":
-        return render_template("register.html")
+        return render_template("reg_log/register.html")
     
     username = request.form["username"]
 
@@ -85,7 +87,7 @@ def register():
     role = request.form["role"]
 
     if errors:
-        return render_template("register.html", username=username, email=email, first_name=first_name, phone=phone, last_name=last_name, role=role, errors=errors)
+        return render_template("reg_log/register.html", username=username, email=email, first_name=first_name, phone=phone, last_name=last_name, role=role, errors=errors)
     else:
         flash(f"Registration successfull, redirecting to login page........", "success")
         if role == "Trekker":
@@ -108,7 +110,7 @@ def register():
 
             if not experience or (not qualification) or (not specialization) or (not address):
                 errors.append(f"All fields are required")
-                return render_template("register.html", username=username, email=email, first_name=first_name, phone=phone, last_name=last_name, role=role, errors=errors, experience=experience, specialization=specialization, qualification=qualification)
+                return render_template("reg_log/register.html", username=username, email=email, first_name=first_name, phone=phone, last_name=last_name, role=role, errors=errors, experience=experience, specialization=specialization, qualification=qualification)
 
             flash("Registration successfull, please wait till the admin approves to login !")
             user = User(username=username,
@@ -132,6 +134,13 @@ def register():
             
         db.session.add(user)
         db.session.commit()
+
+        if user.role == "Trekker":
+            user.user_id = f"U{user.id:03d}"
+        elif user.role == "Trek Staff":
+            user.user_id = f"S{user.id:03d}"
+
+        db.session.commit()
             
         return redirect(url_for('login'))
 
@@ -141,7 +150,7 @@ def register():
 def login():
 
     if request.method == "GET":
-        return render_template("login.html")
+        return render_template("reg_log/login.html")
     
     username = request.form["username"]
     password = request.form["password"]
@@ -150,31 +159,31 @@ def login():
 
     if not requested_user:
         error = f"{username} not registered, Please register."
-        return render_template("login.html", error=error)
+        return render_template("reg_log/login.html", error=error)
 
     if requested_user.role == "Admin":
             error = "Admin cannot login from this page!!!!!!!"
-            return render_template("login.html", username=username, error=error)
+            return render_template("reg_log/login.html", username=username, error=error)
 
     if requested_user:
         password_valid = check_password_hash(requested_user.password_hash, password)
 
     if not password_valid:
         error = f"Incorrect Password"
-        return render_template("login.html", username=username, error=error)
+        return render_template("reg_log/login.html", username=username, error=error)
 
     if requested_user and password_valid:        
         if not requested_user.active and requested_user.role == "Trekker":
             error = "You have been banned from the application, please contact customer care"
-            return render_template("login.html", username=username, error=error)
+            return render_template("reg_log/login.html", username=username, error=error)
         
         if requested_user.status == "Pending" and requested_user.role == "Trek Staff":
             error = "Pending, you account is still being verified."
-            return render_template("login.html", username=username, error=error)
+            return render_template("reg_log/login.html", username=username, error=error)
         
         if requested_user.status == "Rejected" and requested_user.role == "Trek Staff":
             error = "Your application has been rejected."
-            return render_template("login.html", username=username, error=error)
+            return render_template("reg_log/login.html", username=username, error=error)
 
         flash("Login successfull, redirecting now.....", "success")
 
@@ -191,7 +200,7 @@ def login():
 def login_admin():
 
     if request.method == "GET":
-        return render_template("login_admin.html")
+        return render_template("reg_log/login_admin.html")
     
     username = request.form["username"]
     password = request.form["password"]
@@ -205,18 +214,214 @@ def login_admin():
             return redirect(url_for('admin_dashboard'))
         else:
             error = f"Incorrect Password"
-            return render_template("login_admin.html", username=username, error=error)
+            return render_template("reg_log/login_admin.html", username=username, error=error)
     else:
         error = f"{username} is not a admin, please sign in from the user's login page."
-        return render_template("login_admin.html", error=error)
+        return render_template("reg_log/login_admin.html", error=error)
 
-''' Admin Dashboards '''      
+''' Admin Dashboards ''' 
+
+#Render Admin Page
 @app.route("/admin_dashboard", methods=["GET", "POST"])
 @roles_required("Admin")
 def admin_dashboard():
     user = db.session.get(User, session["user_id"])
+    users = User.query.filter_by(role="Trekker", status="Approved").all()
+    users_count = len(users)
+    staffs = User.query.filter_by(role="Trek Staff", status="Approved").all()
+    staff_count = len(staffs)
+    bookings = Booking.query.all()
+    total_bookings = len(bookings)
+    treks = Trek.query.all()
+    trek_count = len(treks)
+    bookings = Booking.query.order_by(Booking.booking_date.desc()).limit(4).all()   
+    return render_template("admin/admin_dashboard.html", user=user, users_count=users_count, staff_count=staff_count, total_bookings=total_bookings, bookings=bookings, trek_count=trek_count)
 
-    return render_template("base.html", user=user)
+# Render Manage Users Page
+@app.route("/manage_users", methods=["GET", "POST"])
+def manage_users():
+    user = db.session.get(User, session["user_id"])
+
+    users = User.query.filter_by(role="Trekker").all()
+
+    return render_template("admin/manage_users.html", users=users, user=user)
+
+#Activates the blacklist user button
+@app.route("/blacklist_user/<int:user_id>", methods=["POST"])
+def blacklist_user(user_id):
+    user = User.query.get_or_404(user_id)
+    user.active = False
+    db.session.commit()
+    flash("User has been blacklisted successfully.!", 'success')
+    return redirect(url_for('manage_users'))
+
+@app.route("/unblacklist_user/<int:user_id>", methods=["POST"])
+def unblacklist_user(user_id):
+    user = User.query.get_or_404(user_id)
+    user.active = True
+    db.session.commit()
+    flash("User has been unblacklisted successfully.!", 'success')
+    return redirect(url_for('manage_users'))
+
+@app.route("/view_user/<int:user_id>", methods=["GET"])
+def view_user(user_id):
+    curr_user = User.query.get_or_404(user_id)
+    user = db.session.get(User, session["user_id"])
+    bookings = Booking.query.filter_by(user_id=user_id).all()
+    return render_template("admin/view_user.html", user=user, curr_user=curr_user)
+
+#Renders Staffs Approved Page
+@app.route("/manage_staff_approved", methods=["GET"])
+def manage_staff_approved():
+    user = db.session.get(User, session["user_id"])
+    staffs = User.query.filter_by(role="Trek Staff", status="Approved").all()
+    pending = User.query.filter_by(role="Trek Staff", status="Pending").count()
+    approved = User.query.filter_by(role="Trek Staff", status="Approved").count()
+    blacklisted = User.query.filter_by(role="Trek Staff", status="Blacklisted").count()
+    return render_template("admin/manage_staff_approved.html", staffs=staffs, user=user, pending=pending, approved=approved, blacklisted=blacklisted)
+
+#Renders Staffs Pending Page
+@app.route("/manage_staff_pending", methods=["GET"])
+def manage_staff_pending():
+    user = db.session.get(User, session["user_id"])
+    staffs = User.query.filter_by(role="Trek Staff", status="Pending").all()
+    pending = User.query.filter_by(role="Trek Staff", status="Pending").count()
+    approved = User.query.filter_by(role="Trek Staff", status="Approved").count()
+    blacklisted = User.query.filter_by(role="Trek Staff", status="Blacklisted").count()
+    return render_template("admin/manage_staff_pending.html", staffs=staffs, user=user, pending=pending, approved=approved, blacklisted=blacklisted)
+
+#Render Staffs Blacklisted Page
+@app.route("/manage_staff_blacklisted", methods=["GET"])
+def manage_staff_blacklisted():
+    user = db.session.get(User, session["user_id"])
+    staffs = User.query.filter_by(role="Trek Staff", status="Blacklisted").all()
+    pending = User.query.filter_by(role="Trek Staff", status="Pending").count()
+    approved = User.query.filter_by(role="Trek Staff", status="Approved").count()
+    blacklisted = User.query.filter_by(role="Trek Staff", status="Blacklisted").count()
+    return render_template("admin/manage_staff_blacklisted.html", staffs=staffs, user=user, pending=pending, approved=approved, blacklisted=blacklisted)
+
+#Approve Staff
+@app.route("/approve_staff/<int:staff_id>", methods=["POST"])
+def approve_staff(staff_id):
+    user = User.query.get_or_404(staff_id)
+    user.status = "Approved"
+    user.active = True
+    db.session.commit()
+    return redirect(url_for('manage_staff_pending'))
+
+#BlackList Staff
+@app.route("/blacklist_staff/<int:staff_id>", methods=["POST"])
+def blacklist_staff(staff_id):
+    user = User.query.get_or_404(staff_id)
+    user.status = "Blacklisted"
+    user.active = False
+    db.session.commit()
+    return redirect(url_for('manage_staff_pending'))
+
+@app.route("/view_staff/<int:staff_id>", methods=["GET"])
+def view_staff(staff_id):
+    staff = User.query.get_or_404(staff_id)
+    user = db.session.get(User, session["user_id"])
+    return render_template("admin/view_staff.html", user=user, staff=staff)
+
+@app.route("/add_edit_treks", methods=["POST", "GET"])
+def add_edit_treks():
+    user = db.session.get(User, session["user_id"])
+    treks = Trek.query.all()
+    return render_template("admin/add_edit_treks.html", user=user, treks=treks)
+    
+@app.route("/add_trek", methods=["GET", "POST"])
+def add_trek():
+    user = db.session.get(User, session["user_id"])
+    staffs = User.query.filter_by(role="Trek Staff", status="Approved")
+    if request.method == "POST":
+        trek_name = request.form["trek_name"]
+        location = request.form["location"]
+        difficulty = request.form["difficulty"]
+        description = request.form["description"]
+        total_slots = int(request.form["total_slots"])
+        start_date = datetime.strptime(
+                request.form["start_date"],
+                "%Y-%m-%d"
+                ).date()
+
+        end_date = datetime.strptime(
+                request.form["end_date"],
+                "%Y-%m-%d"
+                ).date()
+        
+        meeting_point = request.form["meeting_point"]
+        price = float(request.form["price"])
+        staff_id = request.form.get("staff_id")
+
+        if not trek_name or not location or not difficulty or not description or not total_slots or not start_date or not end_date or not meeting_point or not price or not staff_id:
+            error = f"All entries are mandatory"
+            return render_template("admin/add_trek.html", trek_name=trek_name, location=location, difficulty=difficulty, description=description, total_slots=total_slots, start_date=start_date, end_date=end_date, meeting_point=meeting_point, price=price, staff_id=staff_id, error=error, user=user)
+        
+        trek = Trek(
+            trek_name=trek_name,
+            location=location,
+            difficulty=difficulty,
+            description=description,
+            total_slots=total_slots,
+            available_slots=total_slots,
+            start_date=start_date,
+            end_date=end_date,
+            meeting_point=meeting_point,
+            staff_id=staff_id,
+            price=price,
+            status="Approved"
+        )
+
+        db.session.add(trek)
+        db.session.commit()
+
+        return redirect(url_for('add_edit_treks'))
+    
+    return render_template("admin/add_trek.html", user=user, staffs=staffs)
+
+@app.route("/view_trek/<int:trek_id>", methods=["GET"])
+def view_trek(trek_id):
+    trek = Trek.query.get_or_404(trek_id)
+    user = db.session.get(User, session["user_id"])
+    return render_template("admin/view_trek.html", user=user, trek=trek)
+
+@app.route("/edit_trek/<int:trek_id>", methods=["POST", "GET"])
+def edit_trek(trek_id):
+    user = db.session.get(User, session["user_id"])
+    trek = Trek.query.get_or_404(trek_id)
+    return render_template("admin/add_trek.html", user=user, trek_name=trek.trek_name, location=trek.location, description=trek.location, total_slots=trek.total_slots, start_date=trek.start_date, end_date=trek.end_date, meeting_point=trek.meeting_point, price=trek.price)
+
+@app.route("/remove_trek/<int:trek_id>", methods=["POST", "GET"])
+def remove_trek(trek_id):
+    user = db.session.get(User, session["user_id"])
+    trek = Trek.query.get_or_404(trek_id)
+    trek.status = "Cancelled"
+    db.session.commit()
+    return redirect(url_for('add_edit_treks'))
+
+#Booking
+@app.route("/bookings", methods=["POST", "GET"])
+def bookings():
+    user = db.session.get(User, session["user_id"])
+    bookings_ = Booking.query.all()
+    return render_template("admin/bookings.html", user=user, bookings_=bookings_)
+
+@app.route("/view_booking/<int:booking_id>", methods=["GET"])
+def view_booking(booking_id):
+    user = db.session.get(User, session["user_id"])
+    booking = Booking.query.get_or_404(booking_id)
+    return render_template("view_booking.html", user=user, booking=booking)
+
+@app.route("/reports", methods=["POST", "GET"])
+def reports():
+    user = db.session.get(User, session["user_id"])
+    return render_template("admin/add_edit_treks.html", user=user)
+
+@app.route("/settings", methods=["POST", "GET"])
+def settings():
+    user = db.session.get(User, session["user_id"])
+    return render_template("admin/add_edit_treks.html", user=user)
 
 '''Staff Dashboard'''
 @app.route("/staff_dashboard", methods=["POST", "GET"])
@@ -226,7 +431,19 @@ def staff_dashboard():
     user = db.session.get(User, session["user_id"])
 
     if request.method == "GET":
-        return render_template("staff_dashboard.html", user=user)
+        return render_template("staff/staff_dashboard.html", user=user)
+    
+
+@app.route("/my_treks", methods=["POST", "GET"])
+def my_treks():
+    user = db.session.get(User, session["user_id"])
+    return render_template("staff/my_treks.html", user=user)
+
+
+@app.route("/participants", methods=["POST", "GET"])
+def participants():
+    user = db.session.get(User, session["user_id"])
+    return render_template("staff/participants.html", user=user)
     
 '''User Dashboard'''
 @app.route("/user_dashboard", methods=["POST", "GET"])
@@ -236,7 +453,69 @@ def user_dashboard():
     user = db.session.get(User, session["user_id"])
 
     if request.method == "GET":
-        return render_template("user_dashboard.html", user=user)
+        return render_template("user/user_dashboard.html", user=user)
+    
+@app.route("/browse_tasks", methods=["POST", "GET"])
+def browse_tasks():
+    user = db.session.get(User, session["user_id"])
+    return render_template("user/browse_tasks.html", user=user)
+    
+@app.route("/history", methods=["POST", "GET"])
+def history():
+    user = db.session.get(User, session["user_id"])
+    return render_template("user/history.html", user=user)
+    
+@app.route("/my_bookings", methods=["POST", "GET"])
+def my_bookings():
+    user = db.session.get(User, session["user_id"])
+    return render_template("user/my_bookings.html", user=user)
+
+@app.route("/search", methods=["GET"])
+def search():
+    user = db.session.get(User, session["user_id"])
+
+    query = request.args.get("query", "").strip()
+    category = request.args.get("category", "all").strip()
+
+    bookings = []
+    treks = []
+    staffs = []
+    users = []
+    
+    if category == "all" or category == "trek":
+        treks = Trek.query.filter(
+            or_(
+                Trek.trek_name.ilike(f"%{query}%"),
+                Trek.location.ilike(f"%{query}%")
+            )
+        ).all()
+
+    if category == "all" or category == "booking":
+        bookings = Trek.query.filter_by(id=query).all()
+
+    if category == "all" or category == "user":
+        users = User.query.filter(
+            or_(
+                User.f_name.ilike(f"%{query}%"),
+                User.username.ilike(f"%{query}%")
+            )
+        )
+
+    if category == "all" or category == "staff":
+        staffs = User.query.filter(
+            or_(
+                User.user_id.ilike(f"%{query}%"),
+                User.f_name.ilike(f"%{query}%")
+            )
+        )
+
+    return render_template("admin/search.html", user=user, treks=treks, bookings=bookings, users=users, staffs=staffs)
+
+#Profile
+@app.route("/profile")
+def profile():
+    user = db.session.get(User, session["user_id"])
+    return render_template("profile.html", user=user)
 
 #Logout
 @app.route("/logout")
@@ -249,6 +528,7 @@ def logout():
 def access_denied():
     if request.method == "GET":
         return render_template("access_denied.html")
+    
 #Runs application
 if __name__ == "__main__":
     app.run(debug=True)

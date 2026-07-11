@@ -1,0 +1,181 @@
+{% extends 'base.html'%}
+{% block title %}Admin | Search{% endblock %}
+{% block content%}
+<h1 class="p-2 text-center" style="margin-top: 74px;">Search</h1>
+
+<form method="get" action="/search" class="d-flex m-5 p-2">
+    <input type="text" class="form-control m-2" name="search_text" placeholder="name or id" value="{{search_text or ''}}" style="height: 36px;">
+    <div class="col">
+        <select class="form-select form-control m-2 me-5" id="category" name="category" style="height: 36px;">
+            <option selected disabled value="">Category</option>
+            <option value="booking">Bookings</option>
+            <option value="trek">Treks</option>
+            <option value="user">Users</option>
+            <option value="staff">Staffs</option>
+        </select>
+    </div>
+    <button class="btn btn-primary btn-sm col m-2 ms-4 rounded style="height: 36px;">SEARCH</button>
+</form>
+
+<div class="card rounded {% if not bookings %}d-none{% endif %}" style="margin-top: 74px;">
+    <div class="card-header bg-primary text-center text-white"><h4>Bookings</h4></div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User ID</th>
+                        <th>Trek ID</th>
+                        <th>Booking Date</th>
+                        <th>Payment Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for booking in bookings_ %}
+                    <tr>
+                        <td>{{ booking.id }}</td>
+                        <td>{{ booking.user_id }}</td>
+                        <td>{{ booking.trek_id }}</td>
+                        <td>{{ booking.booking_date.strftime("%d %b %Y")}}</td>
+                        <td>{{ booking.booking_status }}</td>
+                        <td>
+                            <a href="{{ url_for('view_booking', booking_id=booking.id) }}" class="btn btn-primary btn-sm">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>  
+
+<div class="card shadow rounded {% if not treks %}d-none{% endif %}" style="margin-top: 74px;">
+    <h4 class="card-header rounded bg-primary text-center text-white">Treks</h4>
+
+    <div class="card-body">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Trek Name</th>
+                    <th>Location</th>
+                    <th>Difficulty</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Slots</th>
+                    <th>Staff</th>
+                    <th>Status</th>
+                    <th>Price</th>
+                    <th>Created at</th>
+                    <th>actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for trek in treks%}
+                <tr>
+                    <td>{{ trek.trek_name }}</td>
+                    <td>{{ trek.location}}</td>
+                    <td>{{ trek.difficulty }}</td>
+                    <td>{{  trek.start_date.strftime("%d %b %Y") }}</td>
+                    <td>{{ trek.end_date.strftime("%d %b %Y") }}</td>
+                    <td>{{ trek.total_slots }}/{{ trek.available_slots }}</td>
+                    <td>{{ trek.user.f_name }}</td>
+                    <td>{{ trek.status }}</td>
+                    <td>₹ {{ trek.price }}</td>
+                    <td>{{ trek.created_at.strftime("%d %b %Y") }}</td>
+                    <td>
+                        <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="btn btn-primary btn-sm">View</a>
+                    </td>    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+<div class="container d-grid card shadow {% if not users %}d-none{% endif %}" style="margin-top: 75px;">
+    <div class="card-header bg-primary text-white rounded">
+        <h4 class="text-center">Users</h4>
+    </div>
+
+    <div class="card-body table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Contact No.</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{user.user_id}}</td>
+                    <td>{{user.f_name + " " + user.l_name}}</td>
+                    <td>{{user.email}}</td>
+                    <td>{{user.phone}}</td>
+                    <td>{% if user.active %}Active{% else %}Blacklisted{% endif %}</td>
+                    <td>   
+                        <a href="{{ url_for('view_user', user_id=user.id)}}" class="btn btn-primary btn-sm m-1">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card container d-grid {% if not staffs %}d-none{% endif %}" style="margin-top: 75px;">
+    <div class="card-header bg-primary rounded text-white">
+        <h4 class="text-center">Staffs</h4>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Staff ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for staff in staffs %}
+                    <tr>
+                        <td>{{staff.user_id}}</td>
+                        <td>{{staff.f_name}}</td>
+                        <td>{{staff.email}}</td>
+                        <td>{{staff.phone}}</td>
+                        <td>{{staff.status}}</td>
+                        <td class="d-flex gap-2">
+                            <a href="{{ url_for('view_staff', staff_id=staff.id) }}" class="btn btn-primary btn-sm">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if not bookings and not treks and not staffs and not users %}
+    <p class="text-white text-center">No Data</p>
+{% endif %}
+
+{% endblock %}

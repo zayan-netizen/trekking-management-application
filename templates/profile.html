@@ -1,0 +1,26 @@
+{% extends 'base.html'%}
+{% block title %}View Profile{% endblock %}
+{% block content%}
+
+<div class="card rounded p-2 mx-auto" style="margin-top: 74px; width: 400px;">
+    <div class="card-header rounded p-4 bg-primary">
+        <h1>User</h1>
+    </div>
+    <div class="card-body">
+        <h4 class="text-center">{{ user.f_name + " " + user.l_name }} ({{user.role}})</h4>
+    </div>
+    <div class="mb-3">
+        <label for="username">Username:</label>
+        <p id="username">{{ user.username }}</p>
+    </div>
+    <div class="mb-3">
+        <label for="email">Email:</label>
+        <p id="email">{{ user.email }}</p>
+    </div>
+    <div class="mb-3">
+        <label for="phone">Phone:</label>
+        <p id="phone">{{ user.phone }}</p>
+    </div>
+</div>
+
+{% endblock %}

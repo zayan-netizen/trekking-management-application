@@ -1,0 +1,33 @@
+{% extends 'base.html'%}
+{% block title%}Admin | Search {% endblock %}
+
+{% block content%}
+<div class="card">
+    <div class="card-header text-center">
+        <h1 class="p-4 bg-primary">View Booking</h1>
+    </div>
+
+    <div class="card-body">
+        <h5>{{ booking.booking_number }}</h5>
+        <div class="mb-3">
+            <label for="user_id">User ID:</label>
+            <p id="user_id">{{ booking.user_id }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="trek_name">Trek:</label>
+            <p id="trek_name">{{ booking.trek.trek_name }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="booking_date">Booking Date:</label>
+            <p id="booking_date">{{ booking.booking_date }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="booking_status">Booking Status:</label>
+            <p id="booking_status">{{ booking.status }}</p>
+        </div>
+        <div class="mb-3">
+            <a href="{{url_for('bookings')}}" class="btn btn-primary mx-auto">Manage Bookings</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

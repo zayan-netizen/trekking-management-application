@@ -1,0 +1,73 @@
+{% extends 'base.html'%}
+{% block title %}Admin | View User{% endblock %}
+{% block content%}
+
+<div class="card rounded p-2 mx-auto" style="margin-top: 74px; width: 900px;">
+    <div class="card-header rounded p-4 bg-primary text-center">
+        <h1>View User</h1>
+    </div>
+    <div class="card-body">
+        <h4 class="text-center">{{ curr_user.f_name + " " + curr_user.l_name }} ({{curr_user.role}})</h4>
+    </div>
+    <div class="mb-3">
+        <label for="username">Username:</label>
+        <p id="username">{{ curr_user.username }}</p>
+    </div>
+    <div class="mb-3">
+        <label for="email">Email:</label>
+        <p id="email">{{ curr_user.email }}</p>
+    </div>
+    <div class="mb-3">
+        <label for="phone">Phone:</label>
+        <p id="phone">{{ curr_user.phone }}</p>
+    </div>
+    <div class="mb-3">
+        <a href="{{url_for('manage_users')}}" class="btn btn-primary mx-auto text-white">Manage Users</a>
+    </div>
+
+    <div class="p-2 rounded bg-primary text-center text-white m-2"><h5>Bookings</h5></div>
+
+    {% if bookings %}
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Trek ID</th>
+                        <th>Booking Date</th>
+                        <th>Booking Status:</th>
+                        <th>Trek Status: </th>
+                        <th>Cancellation Reason:</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.id }}</td>
+                        <td>{{ booking.trek_id }}</td>
+                        <td>{{ booking.booking_date.strftime("%d %b %Y")}}</td>
+                        <td>{{ booking.booking_status }}</td>
+                        <td>{{ booking.trek.status }}</td>
+                        {% if booking.cancellation_reason %}
+                            <td>{{ booking.cancellation_reason }}</td>
+                        {% else %}
+                            <td>---</td>
+                        {% endif %}
+                        <td>
+                            <a href="{{ url_for('view_booking', booking_id=booking.id) }}" class="btn btn-primary btn-sm">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-center">No data</p>
+    {% endif %} 
+</div>
+
+{% endblock %}

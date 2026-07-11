@@ -9,7 +9,7 @@
 #### Problems I faced
 
 - I had a very difficult time in understanding decorators and wrapper functions, to restrict activity based on roles. So I had to study about
-decorators and wrappers, then write a function.
+decorators and wrappers, then write a function for decorators or to restrict access.
 
 - Even after writing the decorator and applying it before the route to user_dashboard, even without logging in, it was redirecting to the user dashboard, I looked it up then I understood that the browser saves the cookies still the next time, so even tho I ended the server and restarted it, it was still redirecting, so I had to create a logout function which clear the sessions.
 

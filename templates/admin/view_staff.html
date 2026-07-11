@@ -1,0 +1,46 @@
+{% extends 'base.html'%}
+{% block title %}Admin | View Staff{% endblock %}
+{% block content%}
+
+<div class="card rounded mx-auto" style="margin-top: 74px; width: 400px">
+    <div class="card-header rounded">
+        <h1 class="p-4 bg-primary text-center">View Staff</h1>
+    </div>
+
+    <div class="card-body">
+        <h5 class="text-center">{{ staff.f_name + " " + staff.l_name }}</h5>
+        <div class="mb-3">
+            <label for="user_id">User ID:</label>
+            <p id="user_id">{{ staff.user_id }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="phone">Phone:</label>
+            <p id="phone">{{ staff.phone }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="experience">Experience:</label>
+            <p id="experience">{{ staff.staff_profile.experience }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="qualification">Qualification:</label>
+            <p id="qualification">{{ staff.staff_profile.qualification }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="specialization">Specialization:</label>
+            <p id="specialization">{{ staff.staff_profile.specialization }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="address">Address</label>
+            <address id="specialization">{{ staff.staff_profile.address }}</address>
+        </div>
+        <div class="mb-3">
+            <label for="joining_date">Joining Date:</label>
+            <p id="joining_date">{{ staff.staff_profile.joining_date }}</p>
+        </div>
+        <div class="mb-3">
+            <a href="{{url_for('manage_staff_pending')}}" class="btn btn-primary mx-auto">Manage Staff</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

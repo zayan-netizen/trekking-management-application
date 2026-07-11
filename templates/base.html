@@ -4,52 +4,67 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <title>{% block title %}{% endblock %}</title>
     </head>
 
     
     <body class="text-white bg-dark">
-        <header class="border-bottom container-fluid bg-dark text-white bg-opacity-95">
-            <div class="row mt-2 justify-content-between">
-                <div class="col-auto">
-                    <h5>Trekking Management Application</h5>
+        <header class="border-bottom bg-dark text-white bg-opacity-95 fixed-top w-100 p-1 d-flex">
+            <div class="d-flex align-items-center w-100 justify-content-between">
+                <div class="ps-2">
+                    <h5 class="{% if current_page == 'search' %}p-2 m-1{% endif %}">Trekking Management Application</h5>
                 </div>
-                <div class="col-auto text-end">
-                    <p>{{ user.role }} | Last Updated: {{ user.updated_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                <div class="{% if current_page == 'search' %}d-none{% endif %}">
+                    <form method="get" action="/search" class="d-flex">
+                        <input type="text" class="form-control m-2" name="search_text" placeholder="name or id" style="height: 36px;">
+                        <div class="col">
+                        <select class="form-select form-control m-2 me-5" id="category" name="category" style="height: 36px;">
+                            <option selected disabled value="">Category</option>
+                            <option value="booking">Bookings</option>
+                            <option value="trek">Treks</option>
+                            <option value="user">Users</option>
+                            <option value="staff">Staffs</option>
+                        </select>
+                        </div>
+                        <button class="btn btn-primary btn-sm col m-2 ms-4 rounded style="height: 36px;">SEARCH</button>
+                    </form>
                 </div>
             </div>
         </header>
 
-        <main class="container row">
-            <div class="col border-right">
-                <nav class="nav nav-pills flex-column d-grid gap-2">
+        <main class="container-fluid">
+            <div class="row">
+            <div class="col-2 border-end min-vh-100 p-3">
+                <nav class="nav nav-pills flex-column gap-0 p-0 position-fixed start-0 vh-100" style="top:120px; width: 255px;">
+                    <h5 class="text-center text-white mb-5 pb-4 border-bottom">Navbar</h5>
                     {% if user.role == 'Admin' %}
-                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if current_page == 'admin_dashboard' %}active{%endif%}">Dashboard</a>
-                        <a href="{{ url_for('add_edit_treks') }}" class="nav-link {% if current_page == 'add_edit_treks' %}active{%endif%}">Manage Treks</a>
-                        <a href="{{ url_for('manage_staff') }}" class="nav-link {% if current_page == 'manage_staff' %}active{%endif%}">Manage Staff</a>
-                        <a href="{{ url_for('manage_users') }}" class="nav-link {% if current_page == 'manage_users' %}active{%endif%}">Manage Users</a>
-                        <a href="{{ url_for('bookings') }}" class="nav-link {% if current_page == 'bookings' %}active{%endif%}">Bookings</a>
-                        <a href="{{ url_for('reports') }}" class="nav-link {% if current_page == 'reports' %}active{%endif%}">Report</a>
-                        <a href="{{ url_for('settings') }}" class="nav-link {% if current_page == 'settings' %}active{%endif%}">Settings</a>
+                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link border rounded text-center text-white{% if current_page == 'admin_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
+                        <a href="{{ url_for('add_edit_treks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'add_edit_treks' %}active bg-white text-black{%endif%}">Manage Treks</a>
+                        <a href="{{ url_for('manage_staff_pending') }}" class="nav-link border rounded text-center text-white{% if current_page == 'manage_staff_pending' %}active bg-white text-black{% elif current_page == 'manage_staff_blacklisted'%}active bg-white text-black{% elif current_page == 'manage_staff_approved' %}active bg-white text-black{%endif%}">Manage Staff</a>
+                        <a href="{{ url_for('manage_users') }}" class="nav-link border rounded text-center text-white{% if current_page == 'manage_users' %}active bg-white{% elif current_page == 'add_trek' %}active bg-white text-black{%endif%}">Manage Users</a>
+                        <a href="{{ url_for('bookings') }}" class="nav-link border rounded text-center text-white{% if current_page == 'bookings' %}active bg-white text-black{%endif%}">Bookings</a>
+                        <a href="{{ url_for('search') }}" class="nav-link border rounded text-center text-white{% if current_page == 'search' %}active bg-white text-black{% endif %}">Search</a>
                     {% endif %}
                     {% if user.role == 'Trek Staff' %}
-                        <a href="{{ url_for('staff_dashboard' )}}" class="nav-link {% if current_page == 'staff_dashboard' %}active{%endif%}">Dashboard</a>
-                        <a href="{{ url_for('my_treks') }}" class="nav-link {% if current_page == 'my_treks' %}active{%endif%}">My Treks</a>
-                        <a href="{{ url_for('participants')}}" class="nav-link {% if current_page == 'participants' %}active{%endif%}">Participants</a>
+                        <a href="{{ url_for('staff_dashboard' )}}" class="nav-link border rounded text-center text-white{% if current_page == 'staff_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
+                        <a href="{{ url_for('my_treks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'my_treks' %}active bg-white text-black{%endif%}">My Treks</a>
+                        <a href="{{ url_for('participants') }}" class="nav-link border rounded text-center text-white{% if current_page == 'participants' %}active bg-white text-black{%endif%}">Participants</a>
                     {% endif %}
                     {% if user.role == 'Trekker' %}
-                        <a href="{{ url_for('user_dashboard' )}}" class="nav-link {% if current_page == 'user_dashboard' %}active{%endif%}">Dashboard</a>
-                        <a href="{{ url_for('browse_tasks' )}}" class="nav-link {% if current_page == 'browse_tasks' %}active{%endif%}">Tasks</a>
-                        <a href="{{ url_for('my_bookings') }}" class="nav-link {% if current_page == 'my_bookings' %}active{%endif%}">My Bookings</a>
-                        <a href="{{ url_for('history') }}" class="nav-link {% if current_page == 'history' %}active{%endif%}">History</a>
+                        <a href="{{ url_for('user_dashboard') }}" class="nav-link border rounded text-center text-white{% if current_page == 'user_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
+                        <a href="{{ url_for('browse_tasks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'browse_tasks' %}active bg-white text-black{%endif%}">Tasks</a>
+                        <a href="{{ url_for('my_bookings') }}" class="nav-link border rounded text-center text-white{% if current_page == 'my_bookings' %}active bg-white text-black{%endif%}">My Bookings</a>
+                        <a href="{{ url_for('history') }}" class="nav-link border rounded text-center text-white{% if current_page == 'history' %}active bg-white text-black{%endif%}">History</a>
                     {% endif %}
-                        <a href="{{ url_for('profile') }}" class="nav-link {% if current_page == 'profile' %}active{%endif%}">Profile</a>        
-                        <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+                        <a href="{{ url_for('profile') }}" class="nav-link border rounded text-center text-white{% if current_page == 'profile' %}active bg-white text-black{%endif%}">Profile</a>        
+                        <a href="{{ url_for('logout') }}" class="nav-link border rounded text-center text-white">Logout</a>
                 </nav>
             </div>
 
-            <div class="col">
+            <div class="col-10">
                 {% block content %}
                 {% endblock %}
+            </div>
             </div>
         </main>
     </body>

@@ -14,6 +14,12 @@ class User(db.Model):
         primary_key=True,
         autoincrement=True
     )
+
+    user_id = db.Column(
+        db.String,
+        nullable=True,
+        unique=True
+    )
     
     username = db.Column(
         db.String(30),
@@ -55,7 +61,7 @@ class User(db.Model):
     status = db.Column(
         db.String(20),
         nullable = False,
-        default = "Approved"
+        default = "Pending"
     )
 
     active = db.Column(
@@ -85,9 +91,9 @@ class User(db.Model):
     )
 
     #Relationship with Trek table, helfull in retreiving all the tasks of a staff
-    assigned_treks = db.relationship(
+    staff = db.relationship(
         "Trek",
-        backref="staff",
+        backref="user",
         lazy=True
     )
 
@@ -132,9 +138,14 @@ class Trek(db.Model):
         nullable = False
     )
 
-    available_slots = db.Column(
+    total_slots = db.Column(
         db.Integer,
         nullable = False
+    )
+
+    available_slots = db.Column(
+        db.Integer,
+        nullable = True
     )
 
     start_date = db.Column(
@@ -163,6 +174,11 @@ class Trek(db.Model):
         nullable = True
     )
 
+    status = db.Column(
+        db.String,
+        nullable=False
+    )
+
     created_at = db.Column(
         db.DateTime,
         nullable = False,
@@ -175,6 +191,8 @@ class Trek(db.Model):
         default = datetime.utcnow,
         onupdate = datetime.utcnow
     )
+
+    image = db.Column(db.String(255), nullable=True)
 
     #Relationship with bookings table, for example helps in finding no. of available slots.
     bookings = db.relationship(
@@ -192,6 +210,11 @@ class Booking(db.Model):
         primary_key = True,
         autoincrement = True
     )
+
+    booking_number = db.Column(
+        db.String(20), 
+        unique=True, 
+        nullable=False)
 
     user_id = db.Column(
         db.Integer,
@@ -213,7 +236,7 @@ class Booking(db.Model):
 
     booking_status = db.Column(
         db.String(50),
-        nullable = False,
+        nullable = False
     )
 
     cancellation_reason = db.Column(
@@ -235,8 +258,8 @@ class StaffProfile(db.Model):
     user_id = db.Column(
         db.Integer,
         db.ForeignKey("users.id"),
-        nullable = False,
-        unique = True
+        nullable=False,
+        unique=True
     )
 
     experience = db.Column(

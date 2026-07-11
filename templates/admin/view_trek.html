@@ -1,0 +1,57 @@
+{% extends 'base.html'%}
+{% block title %}Admin | View Trek{% endblock %}
+
+{% block content%}
+
+<div class="card rounded mx-auto" style="margin-top: 74px; width: 500px;">
+    <div class="card-header bg-primary rounded">
+        <h4 class="p-4 text-center text-white">View Trek</h4>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="trek_name">Name:</label>
+            <p id="trek_name">{{ trek.trek_name }}({{trek.status}})</p>
+        </div>
+        <div class="mb-3">
+            <label for="assigned_to">Staff:</label>
+            <p id="assigned_to">{{ trek.user.f_name }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="location">Location:</label>
+            <p id="location">{{ trek.location }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="difficulty">Difficulty:</label>
+            <p id="difficulty">{{ trek.difficulty }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="description">Description</label>
+            <p id="description">{{ trek.description }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="available_slots">Slots Filled:</label>
+            <p id="available_slots">{{ trek.available_slots }} / {{ trek.total_slots }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="start_date">Start Date:</label>
+            <p id="start_date">{{ trek.start_date }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="end_date">End Date:</label>
+            <p id="end_date">{{ trek.end_date }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="meeting_point">Meeting Point:</label>
+            <p id="meeting_point">{{ trek.meeting_point }}</p>
+        </div>
+        <div class="mb-3">
+            <label for="price">Price:</label>
+            <p id="price">₹ {{ trek.price }}</p>
+        </div>
+        <div class="mb-3">
+            <a href="{{url_for('add_edit_treks')}}" class="btn btn-primary mx-auto">Manage Treks</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
