@@ -1,3 +1,32 @@
-{% extends "base.html"}
+{% extends "base.html" %}
 {% block content %}
+
+<div class="card" style="margin-top: 70px;">
+    <div class="card-header bg-primary text-white rounded m-5">
+        <h2 class="m-5 rounded text-center">Participants</h2>
+    </div>
+
+    <div class="card-body mt-4 table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Contact No.</th>
+                    <th>Payment Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{booking.user.f_name + " " + booking.user.l_name}}</td>
+                    <td>{{booking.user.phone}}</td>
+                    <td>{{booking.payment_status}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {% endblock %}

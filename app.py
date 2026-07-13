@@ -333,7 +333,7 @@ def add_edit_treks():
 @app.route("/add_trek", methods=["GET", "POST"])
 def add_trek():
     user = db.session.get(User, session["user_id"])
-    staffs = User.query.filter_by(role="Trek Staff", status="Approved")
+    staffs = User.query.filter_by(role="Trek Staff", status="Approved").all()
     if request.method == "POST":
         trek_name = request.form["trek_name"]
         location = request.form["location"]
@@ -353,10 +353,11 @@ def add_trek():
         meeting_point = request.form["meeting_point"]
         price = float(request.form["price"])
         staff_id = request.form.get("staff_id")
+        status = request.form.get("status")
 
         if not trek_name or not location or not difficulty or not description or not total_slots or not start_date or not end_date or not meeting_point or not price or not staff_id:
             error = f"All entries are mandatory"
-            return render_template("admin/add_trek.html", trek_name=trek_name, location=location, difficulty=difficulty, description=description, total_slots=total_slots, start_date=start_date, end_date=end_date, meeting_point=meeting_point, price=price, staff_id=staff_id, error=error, user=user)
+            return render_template("admin/add_trek.html", trek_name=trek_name, location=location, difficulty=difficulty, description=description, total_slots=total_slots, start_date=start_date, end_date=end_date, meeting_point=meeting_point, price=price, staff_id=staff_id, error=error, user=user, status=status, staffs=staffs)
         
         trek = Trek(
             trek_name=trek_name,
@@ -370,7 +371,7 @@ def add_trek():
             meeting_point=meeting_point,
             staff_id=staff_id,
             price=price,
-            status="Approved"
+            status=status
         )
 
         db.session.add(trek)
@@ -388,9 +389,10 @@ def view_trek(trek_id):
 
 @app.route("/edit_trek/<int:trek_id>", methods=["POST", "GET"])
 def edit_trek(trek_id):
+    staffs = User.query.filter_by(role='Trek Staff', status='Approved').all()
     user = db.session.get(User, session["user_id"])
     trek = Trek.query.get_or_404(trek_id)
-    return render_template("admin/add_trek.html", user=user, trek_name=trek.trek_name, location=trek.location, description=trek.location, total_slots=trek.total_slots, start_date=trek.start_date, end_date=trek.end_date, meeting_point=trek.meeting_point, price=trek.price)
+    return render_template("admin/add_trek.html", user=user, trek_name=trek.trek_name, location=trek.location, description=trek.location, total_slots=trek.total_slots, start_date=trek.start_date, end_date=trek.end_date, meeting_point=trek.meeting_point, price=trek.price, staff_id=trek.staff_id, staffs=staffs)
 
 @app.route("/remove_trek/<int:trek_id>", methods=["POST", "GET"])
 def remove_trek(trek_id):
@@ -418,11 +420,6 @@ def reports():
     user = db.session.get(User, session["user_id"])
     return render_template("admin/add_edit_treks.html", user=user)
 
-@app.route("/settings", methods=["POST", "GET"])
-def settings():
-    user = db.session.get(User, session["user_id"])
-    return render_template("admin/add_edit_treks.html", user=user)
-
 '''Staff Dashboard'''
 @app.route("/staff_dashboard", methods=["POST", "GET"])
 @roles_required("Trek Staff")
@@ -430,21 +427,41 @@ def staff_dashboard():
 
     user = db.session.get(User, session["user_id"])
 
-    if request.method == "GET":
-        return render_template("staff/staff_dashboard.html", user=user)
+    assigned_treks = Trek.query.filter_by(staff_id=user.id).all()
+
+    registered_count = 0
+    for trek in assigned_treks:
+        if trek.status != 'Cancelled':
+            booking_count = Booking.query.filter_by(trek_id=trek.id).count()
+            registered_count += booking_count
+
+    return render_template("staff/staff_dashboard.html", user=user, registered_count=registered_count, assigned_trek_count=len(assigned_treks), treks=assigned_treks)
     
 
 @app.route("/my_treks", methods=["POST", "GET"])
 def my_treks():
     user = db.session.get(User, session["user_id"])
-    return render_template("staff/my_treks.html", user=user)
+
+    treks = Trek.query.filter_by(staff_id=user.id).all()
+
+    return render_template("staff/my_treks.html", user=user, treks=treks)
 
 
 @app.route("/participants", methods=["POST", "GET"])
 def participants():
     user = db.session.get(User, session["user_id"])
-    return render_template("staff/participants.html", user=user)
-    
+
+    bookings = (Booking.query.join(Trek).filter(Trek.staff_id == user.id).all())
+
+    return render_template("staff/participants.html", user=user, bookings=bookings)
+
+@app.route("/participants_trek/<int:trek_id>", methods=["GET"])
+def participants_trek(trek_id):
+    user = db.session.get(User, session["user_id"])
+    trek = Trek.query.filter(Trek.id==trek_id).first()
+    bookings = Booking.query.filter_by(trek_id=trek_id)    
+    return render_template("staff/participants_trek.html", user=user, bookings=bookings, trek=trek)
+
 '''User Dashboard'''
 @app.route("/user_dashboard", methods=["POST", "GET"])
 @roles_required("Trekker")
@@ -512,10 +529,32 @@ def search():
     return render_template("admin/search.html", user=user, treks=treks, bookings=bookings, users=users, staffs=staffs)
 
 #Profile
-@app.route("/profile")
+@app.route("/profile", methods=["POST", "GET"])
 def profile():
     user = db.session.get(User, session["user_id"])
-    return render_template("profile.html", user=user)
+
+    experience = ""
+    qualification = ""
+    specialization = ""
+    address = ""
+
+    if user.role == 'Trek Staff':
+        experience = user.staff_profile.experience
+        qualification = user.staff_profile.qualification
+        specialization = user.staff_profile.specialization
+        address = user.staff_profile.address
+
+    if request.method == "POST":
+        user.staff_profile.experience = request.form["experience"]
+        user.staff_profile.qualification = request.form["qualification"]
+        user.staff_profile.specialization = request.form["specialization"]
+        user.staff_profile.address = request.form["address"]
+
+        db.session.commit()
+
+        return redirect(url_for('profile'))
+
+    return render_template("profile.html", user=user, experience=experience, qualification=qualification, specialization=specialization, address=address)
 
 #Logout
 @app.route("/logout")

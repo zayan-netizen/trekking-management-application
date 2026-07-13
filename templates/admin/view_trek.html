@@ -49,7 +49,7 @@
             <p id="price">₹ {{ trek.price }}</p>
         </div>
         <div class="mb-3">
-            <a href="{{url_for('add_edit_treks')}}" class="btn btn-primary mx-auto">Manage Treks</a>
+            <a {% if user.role == 'Admin' %}href="{{url_for('add_edit_treks')}}"{% else %}href="{{url_for('my_treks')}}"{% endif %} class="btn btn-primary mx-auto">Manage Treks</a>
         </div>
     </div>
 </div>

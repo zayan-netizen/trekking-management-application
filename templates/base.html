@@ -12,8 +12,9 @@
         <header class="border-bottom bg-dark text-white bg-opacity-95 fixed-top w-100 p-1 d-flex">
             <div class="d-flex align-items-center w-100 justify-content-between">
                 <div class="ps-2">
-                    <h5 class="{% if current_page == 'search' %}p-2 m-1{% endif %}">Trekking Management Application</h5>
+                    <h5 class="{% if current_page == 'search' %}p-2 m-1{% endif %}{% if user.role == 'Trek Staff'%}p-2 m-1{% endif %}">Trekking Management Application</h5>
                 </div>
+                {% if user.role != 'Trek Staff' %}
                 <div class="{% if current_page == 'search' %}d-none{% endif %}">
                     <form method="get" action="/search" class="d-flex">
                         <input type="text" class="form-control m-2" name="search_text" placeholder="name or id" style="height: 36px;">
@@ -26,16 +27,17 @@
                             <option value="staff">Staffs</option>
                         </select>
                         </div>
-                        <button class="btn btn-primary btn-sm col m-2 ms-4 rounded style="height: 36px;">SEARCH</button>
+                        <button class="btn btn-primary btn-sm col m-2 ms-4 rounded" style="height: 36px;">SEARCH</button>
                     </form>
                 </div>
+                {% endif %}
             </div>
         </header>
 
         <main class="container-fluid">
             <div class="row">
-            <div class="col-2 border-end min-vh-100 p-3">
-                <nav class="nav nav-pills flex-column gap-0 p-0 position-fixed start-0 vh-100" style="top:120px; width: 255px;">
+            <div class="col border-end min-vh-100 p-3 bg-opacity-95">
+                <nav class="nav nav-pills flex-column gap-0 p-0 position-fixed start-0 vh-100 z-3" style="top:120px; width: 200px;">
                     <h5 class="text-center text-white mb-5 pb-4 border-bottom">Navbar</h5>
                     {% if user.role == 'Admin' %}
                         <a href="{{ url_for('admin_dashboard') }}" class="nav-link border rounded text-center text-white{% if current_page == 'admin_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
@@ -47,8 +49,8 @@
                     {% endif %}
                     {% if user.role == 'Trek Staff' %}
                         <a href="{{ url_for('staff_dashboard' )}}" class="nav-link border rounded text-center text-white{% if current_page == 'staff_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
-                        <a href="{{ url_for('my_treks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'my_treks' %}active bg-white text-black{%endif%}">My Treks</a>
-                        <a href="{{ url_for('participants') }}" class="nav-link border rounded text-center text-white{% if current_page == 'participants' %}active bg-white text-black{%endif%}">Participants</a>
+                        <a href="{{ url_for('my_treks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'my_treks' %}active bg-white text-black{%endif%}">Assigned Treks</a>
+                        <a href="{{ url_for('participants') }}" class="nav-link border rounded text-center text-white{% if current_page == 'participants' or current_page == 'participants_trek' %}active bg-white text-black{%endif%}">Participants</a>
                     {% endif %}
                     {% if user.role == 'Trekker' %}
                         <a href="{{ url_for('user_dashboard') }}" class="nav-link border rounded text-center text-white{% if current_page == 'user_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
@@ -61,7 +63,7 @@
                 </nav>
             </div>
 
-            <div class="col-10">
+            <div class="col-auto" style="width: 1319px;">
                 {% block content %}
                 {% endblock %}
             </div>
