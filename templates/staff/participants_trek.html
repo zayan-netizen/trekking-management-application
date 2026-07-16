@@ -19,7 +19,7 @@
             <tbody>
                 {% for booking in bookings %}
                 <tr>
-                    <td>{{booking.user.f_name + " " + booking.user.l_name}}</td>
+                    <td>{{booking.user.f_name}} {{booking.user.l_name}}</td>
                     <td>{{booking.user.phone}}</td>
                     <td>{{booking.payment_status}}</td>
                 </tr>

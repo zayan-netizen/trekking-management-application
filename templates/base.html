@@ -12,17 +12,16 @@
         <header class="border-bottom bg-dark text-white bg-opacity-95 fixed-top w-100 p-1 d-flex">
             <div class="d-flex align-items-center w-100 justify-content-between">
                 <div class="ps-2">
-                    <h5 class="{% if current_page == 'search' %}p-2 m-1{% endif %}{% if user.role == 'Trek Staff'%}p-2 m-1{% endif %}">Trekking Management Application</h5>
+                    <h5 class="{% if current_page == 'search' %}p-2 m-1{% endif %}{% if user.role != 'Admin'%}p-2 m-1{% endif %}">Trekking Management Application</h5>
                 </div>
-                {% if user.role != 'Trek Staff' %}
+                {% if user.role == 'Admin' %}
                 <div class="{% if current_page == 'search' %}d-none{% endif %}">
                     <form method="get" action="/search" class="d-flex">
                         <input type="text" class="form-control m-2" name="search_text" placeholder="name or id" style="height: 36px;">
                         <div class="col">
                         <select class="form-select form-control m-2 me-5" id="category" name="category" style="height: 36px;">
                             <option selected disabled value="">Category</option>
-                            <option value="booking">Bookings</option>
-                            <option value="trek">Treks</option>
+                            <option value="trek">Trek</option>
                             <option value="user">Users</option>
                             <option value="staff">Staffs</option>
                         </select>
@@ -54,7 +53,7 @@
                     {% endif %}
                     {% if user.role == 'Trekker' %}
                         <a href="{{ url_for('user_dashboard') }}" class="nav-link border rounded text-center text-white{% if current_page == 'user_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
-                        <a href="{{ url_for('browse_tasks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'browse_tasks' %}active bg-white text-black{%endif%}">Tasks</a>
+                        <a href="{{ url_for('browse_tasks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'browse_tasks' %}active bg-white text-black{%endif%}">Treks</a>
                         <a href="{{ url_for('my_bookings') }}" class="nav-link border rounded text-center text-white{% if current_page == 'my_bookings' %}active bg-white text-black{%endif%}">My Bookings</a>
                         <a href="{{ url_for('history') }}" class="nav-link border rounded text-center text-white{% if current_page == 'history' %}active bg-white text-black{%endif%}">History</a>
                     {% endif %}

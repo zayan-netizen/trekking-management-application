@@ -214,7 +214,7 @@ class Booking(db.Model):
     booking_number = db.Column(
         db.String(20), 
         unique=True, 
-        nullable=False)
+        nullable=True)
 
     user_id = db.Column(
         db.Integer,
@@ -232,6 +232,12 @@ class Booking(db.Model):
         db.DateTime,
         nullable = False,
         default = datetime.utcnow
+    )
+
+    payment_status = db.Column(
+        db.String,
+        nullable=False,
+        default="Paid"
     )
 
     booking_status = db.Column(

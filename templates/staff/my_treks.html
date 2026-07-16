@@ -31,6 +31,7 @@
                     <td>₹ {{ trek.price }}</td>
                     <td>{{trek.status}}</td>
                     <td>{{ trek.created_at.strftime("%d %b %Y") }}</td>
+                    {% if trek.status != 'completed' or trek.status != 'Cancelled' %}
                     <td class="{% if trek.status == 'Cancelled' %}d-none{% endif %}">
                         <form action="{{ url_for('edit_trek', trek_id=trek.id) }}" method="get">
                             <button type="submit" class="btn btn-primary btn-sm p-1 m-1">EDIT</button>
@@ -40,11 +41,12 @@
                         </form>
                         <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="btn btn-primary btn-sm p-1 m-1">View</a>
                     </td>
+                    {% else %}
                     <td>
-                        {% if trek.status == 'Cancelled'%}
-                            Removed
-                        {% endif %}
+                        Removed
                     </td>
+                    {% endif %}
+                    
                     
                 </tr>
                 {% endfor %}

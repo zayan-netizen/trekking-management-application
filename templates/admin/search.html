@@ -8,52 +8,15 @@
     <div class="col">
         <select class="form-select form-control m-2 me-5" id="category" name="category" style="height: 36px;">
             <option selected disabled value="">Category</option>
-            <option value="booking">Bookings</option>
             <option value="trek">Treks</option>
             <option value="user">Users</option>
             <option value="staff">Staffs</option>
         </select>
     </div>
-    <button class="btn btn-primary btn-sm col m-2 ms-4 rounded style="height: 36px;">SEARCH</button>
+    <button class="btn btn-primary btn-sm col m-2 ms-4 rounded" style="height: 36px;">SEARCH</button>
 </form>
 
-<div class="card rounded {% if not bookings %}d-none{% endif %}" style="margin-top: 74px;">
-    <div class="card-header bg-primary text-center text-white"><h4>Bookings</h4></div>
-
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Booking ID</th>
-                        <th>User ID</th>
-                        <th>Trek ID</th>
-                        <th>Booking Date</th>
-                        <th>Payment Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for booking in bookings_ %}
-                    <tr>
-                        <td>{{ booking.id }}</td>
-                        <td>{{ booking.user_id }}</td>
-                        <td>{{ booking.trek_id }}</td>
-                        <td>{{ booking.booking_date.strftime("%d %b %Y")}}</td>
-                        <td>{{ booking.booking_status }}</td>
-                        <td>
-                            <a href="{{ url_for('view_booking', booking_id=booking.id) }}" class="btn btn-primary btn-sm">View</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
-        </div>
-    </div>
-</div>  
-
+{% if treks %}
 <div class="card shadow rounded {% if not treks %}d-none{% endif %}" style="margin-top: 74px;">
     <h4 class="card-header rounded bg-primary text-center text-white">Treks</h4>
 
@@ -99,7 +62,9 @@
     </div>
     </div>
 </div>
+{% endif %}
 
+{% if users %}
 <div class="container d-grid card shadow {% if not users %}d-none{% endif %}" style="margin-top: 75px;">
     <div class="card-header bg-primary text-white rounded">
         <h4 class="text-center">Users</h4>
@@ -135,7 +100,9 @@
         </table>
     </div>
 </div>
+{% endif %}
 
+{% if staffs%}
 <div class="card container d-grid {% if not staffs %}d-none{% endif %}" style="margin-top: 75px;">
     <div class="card-header bg-primary rounded text-white">
         <h4 class="text-center">Staffs</h4>
@@ -173,7 +140,7 @@
         </div>
     </div>
 </div>
-
+{% endif %}
 {% if not bookings and not treks and not staffs and not users %}
     <p class="text-white text-center">No Data</p>
 {% endif %}

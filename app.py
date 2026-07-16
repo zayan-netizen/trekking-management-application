@@ -357,7 +357,7 @@ def add_trek():
 
         if not trek_name or not location or not difficulty or not description or not total_slots or not start_date or not end_date or not meeting_point or not price or not staff_id:
             error = f"All entries are mandatory"
-            return render_template("admin/add_trek.html", trek_name=trek_name, location=location, difficulty=difficulty, description=description, total_slots=total_slots, start_date=start_date, end_date=end_date, meeting_point=meeting_point, price=price, staff_id=staff_id, error=error, user=user, status=status, staffs=staffs)
+            return render_template("admin/add_trek.html", trek=None, trek_name=trek_name, location=location, difficulty=difficulty, description=description, total_slots=total_slots, start_date=start_date, end_date=end_date, meeting_point=meeting_point, price=price, staff_id=staff_id, error=error, user=user, status=status, staffs=staffs)
         
         trek = Trek(
             trek_name=trek_name,
@@ -379,7 +379,7 @@ def add_trek():
 
         return redirect(url_for('add_edit_treks'))
     
-    return render_template("admin/add_trek.html", user=user, staffs=staffs)
+    return render_template("admin/add_trek.html", user=user, staffs=staffs, trek=None)
 
 @app.route("/view_trek/<int:trek_id>", methods=["GET"])
 def view_trek(trek_id):
@@ -392,7 +392,29 @@ def edit_trek(trek_id):
     staffs = User.query.filter_by(role='Trek Staff', status='Approved').all()
     user = db.session.get(User, session["user_id"])
     trek = Trek.query.get_or_404(trek_id)
-    return render_template("admin/add_trek.html", user=user, trek_name=trek.trek_name, location=trek.location, description=trek.location, total_slots=trek.total_slots, start_date=trek.start_date, end_date=trek.end_date, meeting_point=trek.meeting_point, price=trek.price, staff_id=trek.staff_id, staffs=staffs)
+
+    if request.method == "POST":
+        trek.trek_name = request.form["trek_name"]
+        trek.location = request.form["location"]
+        trek.difficulty = request.form["difficulty"]
+        trek.description = request.form["description"]
+        trek.total_slots = int(request.form["total_slots"])
+        trek.start_date = datetime.strptime(
+            request.form["start_date"], "%Y-%m-%d"
+        ).date()
+        trek.end_date = datetime.strptime(
+            request.form["end_date"], "%Y-%m-%d"
+        ).date()
+        trek.meeting_point = request.form["meeting_point"]
+        trek.price = float(request.form["price"])
+        trek.staff_id = request.form["staff_id"]
+        trek.status = request.form["status"]
+
+        db.session.commit()
+
+        return redirect(url_for("add_edit_treks"))
+    
+    return render_template("admin/add_trek.html", trek=trek, user=user, trek_name=trek.trek_name, location=trek.location, description=trek.description, total_slots=trek.total_slots, start_date=trek.start_date, end_date=trek.end_date, meeting_point=trek.meeting_point, price=trek.price, staff_id=trek.staff_id, staffs=staffs)
 
 @app.route("/remove_trek/<int:trek_id>", methods=["POST", "GET"])
 def remove_trek(trek_id):
@@ -413,7 +435,7 @@ def bookings():
 def view_booking(booking_id):
     user = db.session.get(User, session["user_id"])
     booking = Booking.query.get_or_404(booking_id)
-    return render_template("view_booking.html", user=user, booking=booking)
+    return render_template("admin/view_booking.html", user=user, booking=booking)
 
 @app.route("/reports", methods=["POST", "GET"])
 def reports():
@@ -429,13 +451,15 @@ def staff_dashboard():
 
     assigned_treks = Trek.query.filter_by(staff_id=user.id).all()
 
+    users = Booking.query.join(Trek).filter(Trek.staff_id == user.id, Booking.booking_status != "Cancelled").all()
+
     registered_count = 0
     for trek in assigned_treks:
         if trek.status != 'Cancelled':
-            booking_count = Booking.query.filter_by(trek_id=trek.id).count()
+            booking_count = Booking.query.filter(Booking.trek_id==trek.id, Booking.booking_status != "Cancelled").count()
             registered_count += booking_count
 
-    return render_template("staff/staff_dashboard.html", user=user, registered_count=registered_count, assigned_trek_count=len(assigned_treks), treks=assigned_treks)
+    return render_template("staff/staff_dashboard.html", user=user, registered_count=registered_count, assigned_trek_count=len(assigned_treks), treks=assigned_treks, users=users)
     
 
 @app.route("/my_treks", methods=["POST", "GET"])
@@ -451,7 +475,7 @@ def my_treks():
 def participants():
     user = db.session.get(User, session["user_id"])
 
-    bookings = (Booking.query.join(Trek).filter(Trek.staff_id == user.id).all())
+    bookings = (Booking.query.join(Trek).filter(Trek.staff_id == user.id, Booking.booking_status != "Cancelled").all())
 
     return render_template("staff/participants.html", user=user, bookings=bookings)
 
@@ -459,7 +483,7 @@ def participants():
 def participants_trek(trek_id):
     user = db.session.get(User, session["user_id"])
     trek = Trek.query.filter(Trek.id==trek_id).first()
-    bookings = Booking.query.filter_by(trek_id=trek_id)    
+    bookings = Booking.query.filter(Booking.trek_id==trek_id, Booking.booking_status != "Cancelled").all()    
     return render_template("staff/participants_trek.html", user=user, bookings=bookings, trek=trek)
 
 '''User Dashboard'''
@@ -469,23 +493,93 @@ def user_dashboard():
 
     user = db.session.get(User, session["user_id"])
 
-    if request.method == "GET":
-        return render_template("user/user_dashboard.html", user=user)
+    booking_completed = Booking.query.join(Trek).filter(Booking.booking_status != "Cancelled", Trek.status=="completed", Booking.user_id==user.id).count()
+    total_bookings = Booking.query.filter(Booking.booking_status=="Success", Booking.user_id==user.id).count()
+    bookings = Booking.query.join(Trek).filter(Trek.status != "Cancelled", Booking.user_id==user.id, Booking.booking_status=="Success", Trek.status != 'completed').all()
+
+    return render_template("user/user_dashboard.html", user=user, booking_completed=booking_completed, total_bookings=total_bookings, bookings=bookings)
     
 @app.route("/browse_tasks", methods=["POST", "GET"])
 def browse_tasks():
     user = db.session.get(User, session["user_id"])
-    return render_template("user/browse_tasks.html", user=user)
+
+    trek_name = request.args.get("trek_name", "").strip()
+    location = request.args.get("location", "").strip()
+    difficulty = request.args.get("difficulty", "").strip()
+
+    query = Trek.query.filter(Trek.status == "open")
+
+    if trek_name:
+        query = query.filter(Trek.trek_name.ilike(f"%{trek_name}%"))
+
+    if location:
+        query = query.filter(Trek.location.ilike(f"%{location}%"))
+
+    if difficulty:
+        query = query.filter(Trek.difficulty == difficulty)
+
+    treks = query.all()
+    
+    return render_template("user/browse_tasks.html", user=user, treks=treks)
+
+@app.route("/book/<int:trek_id>")
+def book(trek_id):
+    user = db.session.get(User, session["user_id"])
+    booking = Booking.query.filter_by(user_id=user.id, trek_id=trek_id).first()
+    trek = Trek.query.get_or_404(trek_id)
+
+    if booking:
+        error = ("Already booked for this event")
+        return render_template("user/my_bookings.html", user=user, error=error)
+    
+    if trek.status == "Cancelled":
+        error = "Trek was removed by the owner"
+        return render_template("user/my_bookings.html", user=user, error=error)
+    
+    if trek.available_slots <= 0:
+        error = ("Slots filled!")
+        return render_template("user/my_bookings.html", user=user, error=error)
+    
+    booking = Booking(
+        user_id=user.id,
+        trek_id=trek_id,
+        booking_status="Success"
+    )
+
+    db.session.add(booking)
+    db.session.commit()
+    
+    booking.trek.available_slots -= 1
+    
+    booking.booking_number = f"B{booking.id:03d}"
+
+    db.session.commit()
+
+    return redirect(url_for('my_bookings'))
     
 @app.route("/history", methods=["POST", "GET"])
 def history():
     user = db.session.get(User, session["user_id"])
-    return render_template("user/history.html", user=user)
+    bookings = Booking.query.join(Trek).filter(Trek.status == 'completed', Booking.user_id==user.id).all()
+    return render_template("user/history.html", user=user, bookings=bookings)
     
 @app.route("/my_bookings", methods=["POST", "GET"])
 def my_bookings():
     user = db.session.get(User, session["user_id"])
-    return render_template("user/my_bookings.html", user=user)
+    bookings = Booking.query.join(Trek).filter(Booking.user_id==user.id, Trek.status!='completed').all()
+    return render_template("user/my_bookings.html", user=user, bookings=bookings)
+
+@app.route("/cancel_booking/<int:booking_id>", methods=["GET", "POST"])
+def cancel_booking(booking_id):
+    booking = Booking.query.filter(Booking.id==booking_id).first()
+    if booking:
+        booking.booking_status = "Cancelled"
+        booking.trek.available_slots += 1
+        db.session.commit()
+    else:
+        flash("Booking not found.")
+
+    return redirect(url_for('my_bookings'))
 
 @app.route("/search", methods=["GET"])
 def search():
@@ -507,11 +601,9 @@ def search():
             )
         ).all()
 
-    if category == "all" or category == "booking":
-        bookings = Trek.query.filter_by(id=query).all()
-
     if category == "all" or category == "user":
         users = User.query.filter(
+            User.role=='Trekker',
             or_(
                 User.f_name.ilike(f"%{query}%"),
                 User.username.ilike(f"%{query}%")
@@ -520,13 +612,14 @@ def search():
 
     if category == "all" or category == "staff":
         staffs = User.query.filter(
+            User.role == 'Trek Staff',
             or_(
                 User.user_id.ilike(f"%{query}%"),
                 User.f_name.ilike(f"%{query}%")
             )
         )
 
-    return render_template("admin/search.html", user=user, treks=treks, bookings=bookings, users=users, staffs=staffs)
+    return render_template("admin/search.html", user=user, treks=treks, users=users, staffs=staffs)
 
 #Profile
 @app.route("/profile", methods=["POST", "GET"])
