@@ -1,9 +1,9 @@
 {% extends 'base.html'%}
 {% block title %}Admin | Search{% endblock %}
 {% block content%}
-<h1 class="p-2 text-center" style="margin-top: 74px;">Search</h1>
+<h1 class="p-2 text-center text-white">Search</h1>
 
-<form method="get" action="/search" class="d-flex m-5 p-2">
+<form method="get" action="/search" class="d-flex m-4 p-2">
     <input type="text" class="form-control m-2" name="search_text" placeholder="name or id" value="{{search_text or ''}}" style="height: 36px;">
     <div class="col">
         <select class="form-select form-control m-2 me-5" id="category" name="category" style="height: 36px;">
@@ -17,12 +17,12 @@
 </form>
 
 {% if treks %}
-<div class="card shadow rounded {% if not treks %}d-none{% endif %}" style="margin-top: 74px;">
-    <h4 class="card-header rounded bg-primary text-center text-white">Treks</h4>
+<div class="rounded {% if not treks %}d-none{% endif %} m-3">
+    <h2 class="rounded text-center text-white m-3">Treks</h2>
 
-    <div class="card-body">
+    <div>
     <div class="table-responsive">
-        <table class="table table-striped table-hover">
+        <table class="table table-dark table-hover">
             <thead class="table-dark">
                 <tr>
                     <th>Trek Name</th>
@@ -65,13 +65,13 @@
 {% endif %}
 
 {% if users %}
-<div class="container d-grid card shadow {% if not users %}d-none{% endif %}" style="margin-top: 75px;">
-    <div class="card-header bg-primary text-white rounded">
-        <h4 class="text-center">Users</h4>
+<div class="container d-grid {% if not users %}d-none{% endif %}" style="margin-top: 25px;">
+    <div class="text-white rounded">
+        <h2 class="text-center m-3">Users</h2>
     </div>
 
     <div class="card-body table-responsive">
-        <table class="table table-striped table-hover align-middle">
+        <table class="table table-dark table-hover align-middle w-100">
             <thead class="table-dark">
                 <tr>
                     <th>User ID</th>
@@ -103,14 +103,14 @@
 {% endif %}
 
 {% if staffs%}
-<div class="card container d-grid {% if not staffs %}d-none{% endif %}" style="margin-top: 75px;">
-    <div class="card-header bg-primary rounded text-white">
-        <h4 class="text-center">Staffs</h4>
+<div class="container d-grid {% if not staffs %}d-none{% endif %}" style="margin-top: 25px;">
+    <div class="rounded text-white">
+        <h2 class="text-center m-3">Staffs</h2>
     </div>
 
-    <div class="card-body">
+    <div>
         <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
+            <table class="table table-dark table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
                         <th>Staff ID</th>

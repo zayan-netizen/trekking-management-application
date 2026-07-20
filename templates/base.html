@@ -4,12 +4,13 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="static/global.css" rel="stylesheet">
         <title>{% block title %}{% endblock %}</title>
     </head>
 
     
     <body class="text-white bg-dark">
-        <header class="border-bottom bg-dark text-white bg-opacity-95 fixed-top w-100 p-1 d-flex">
+        <header class="border-bottom text-white bg-opacity-95 fixed-top w-100 d-flex bg-dark">
             <div class="d-flex align-items-center w-100 justify-content-between">
                 <div class="ps-2">
                     <h5 class="{% if current_page == 'search' %}p-2 m-1{% endif %}{% if user.role != 'Admin'%}p-2 m-1{% endif %}">Trekking Management Application</h5>
@@ -35,14 +36,14 @@
 
         <main class="container-fluid">
             <div class="row">
-            <div class="col border-end min-vh-100 p-3 bg-opacity-95">
-                <nav class="nav nav-pills flex-column gap-0 p-0 position-fixed start-0 vh-100 z-3" style="top:120px; width: 200px;">
+            <div class="col-1 border-end vh-100 bg-opacity-95 bg-dark" {% if user.role=='Trek Staff' %}style="width: 139px;"{% elif user.role=='Admin'%}style="width: 133px;"{% else %}style="width: 126px"{% endif %}>
+                <nav class="nav nav-pills flex-column gap-0 p-0 start-0 z-3 position-fixed" style="top: 180px;">
                     <h5 class="text-center text-white mb-5 pb-4 border-bottom">Navbar</h5>
                     {% if user.role == 'Admin' %}
                         <a href="{{ url_for('admin_dashboard') }}" class="nav-link border rounded text-center text-white{% if current_page == 'admin_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
                         <a href="{{ url_for('add_edit_treks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'add_edit_treks' %}active bg-white text-black{%endif%}">Manage Treks</a>
                         <a href="{{ url_for('manage_staff_pending') }}" class="nav-link border rounded text-center text-white{% if current_page == 'manage_staff_pending' %}active bg-white text-black{% elif current_page == 'manage_staff_blacklisted'%}active bg-white text-black{% elif current_page == 'manage_staff_approved' %}active bg-white text-black{%endif%}">Manage Staff</a>
-                        <a href="{{ url_for('manage_users') }}" class="nav-link border rounded text-center text-white{% if current_page == 'manage_users' %}active bg-white{% elif current_page == 'add_trek' %}active bg-white text-black{%endif%}">Manage Users</a>
+                        <a href="{{ url_for('manage_users') }}" class="nav-link border rounded text-center text-white{% if current_page == 'manage_users' %}active bg-white{% elif current_page == 'add_trek' %}active bg-white text-black text-black{%endif%}">Manage Users</a>
                         <a href="{{ url_for('bookings') }}" class="nav-link border rounded text-center text-white{% if current_page == 'bookings' %}active bg-white text-black{%endif%}">Bookings</a>
                         <a href="{{ url_for('search') }}" class="nav-link border rounded text-center text-white{% if current_page == 'search' %}active bg-white text-black{% endif %}">Search</a>
                     {% endif %}
@@ -62,7 +63,7 @@
                 </nav>
             </div>
 
-            <div class="col-auto" style="width: 1319px;">
+            <div class="col card bg-dark" style="margin-top: 90px;">
                 {% block content %}
                 {% endblock %}
             </div>

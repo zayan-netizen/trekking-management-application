@@ -2,6 +2,16 @@
 
 - The Trekking Management Application is being developed as a college project to demonstrate the application of software engineering principles, database management, and web application development. 
 
+##### First UI
+
+<img src="static/initial.png" width="50%">
+
+- Initial UI in which I used cards for everything, finally removed the cards and it looked better.
+
+##### Final UI
+
+<img src="static/final.png" width="50%">
+
 #### Problems I faced
 
 - I had a very difficult time in understanding decorators and wrapper functions, to restrict activity based on roles. So I had to study about decorators and wrappers, then write a function for decorators or to restrict access.

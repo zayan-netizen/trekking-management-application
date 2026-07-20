@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Admin | Manage Treks{% endblock %}
 {% block content %}
-<div class="card shadow rounded" style="margin-top: 74px;">
-    <h3 class="card-header rounded p-5 bg-primary text-center text-white">Treks</h3>
+<div class="rounded" style="margin-top: 74px;">
+    <h1 class="rounded p-2 ms-5 mb-5 text-white text-center">Treks</h1>
 
     <div >
         <form method="get" action="{{ url_for('add_trek' )}}" class="d-flex">
-            <button class="btn btn-primary ms-auto m-3">ADD TREK</button>
+            <button class="btn btn-primary ms-auto me-5">ADD TREK</button>
         </form>
     </div>
 
-    <div class="card-body">
+    <div>
     <div class="table-responsive m-2">
-        <table class="table table-striped table-hover">
+        <table class="table table-dark table-hover">
             <thead class="table-dark">
                 <tr>
                     <th>Trek Name</th>
@@ -44,12 +44,12 @@
                     <td>{{ trek.created_at.strftime("%d %b %Y") }}</td>
                     <td class="{% if trek.status == 'Cancelled' %}d-none{% endif %}">
                         <form action="{{ url_for('edit_trek', trek_id=trek.id) }}" method="get">
-                            <button type="submit" class="btn btn-info btn-sm">EDIT</button>
+                            <button type="submit" class="p-0 btn btn-primary btn-sm">EDIT</button>
                         </form>
                         <form action="{{ url_for('remove_trek', trek_id=trek.id )}}" method="POST">
-                            <button type="submit" class="btn btn-danger btn-sm">REMOVE</button>
+                            <button type="submit" class="col btn btn-danger btn-sm p-0">REMOVE</button>
                         </form>
-                        <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="btn btn-primary btn-sm">View</a>
+                        <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="btn btn-info btn-sm p-0">View</a>
                     </td>
                     <td>
                         {% if trek.status == 'Cancelled'%}

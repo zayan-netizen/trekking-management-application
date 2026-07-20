@@ -2,16 +2,15 @@
 {% block title %}Admin | Bookings{% endblock %}
 
 {% block content %}
-<div class="card rounded" style="margin-top: 74px;">
-    <div class="card-header p-4 bg-primary text-center text-white"><h1>Bookings</h1></div>
-
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover table-striped">
-                <thead class="table-dark">
+<div>
+    <div>
+        <h1 class="p-2 m-5 text-center text-white">Bookings</h1>
+        <div class="table-responsive text-center">
+            <table class="table table-borderless table-dark text-white">
+                <thead class="sticky-top">
                     <tr>
                         <th>Booking ID</th>
-                        <th>User ID</th>
+                        <th>User</th>
                         <th>Trek ID</th>
                         <th>Booking Date</th>
                         <th>Payment Status</th>
@@ -23,7 +22,7 @@
                     {% for booking in bookings_ %}
                     <tr>
                         <td>{{ booking.id }}</td>
-                        <td>{{ booking.user_id }}</td>
+                        <td>{{ booking.user.f_name }} {{ booking.user.l_name }}</td>
                         <td>{{ booking.trek_id }}</td>
                         <td>{{ booking.booking_date.strftime("%d %b %Y")}}</td>
                         <td>{{ booking.booking_status }}</td>

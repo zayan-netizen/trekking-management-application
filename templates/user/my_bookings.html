@@ -2,13 +2,13 @@
 {% block title %}User | Bookings{% endblock %}
 {% block content %}
 
-<div class="card" style="margin-top: 70px;">
-    <div class="card-header bg-primary text-white rounded m-5">
-        <h2 class="m-5 rounded text-center">Bookings</h2>
+<div style="margin-top: 25px;">
+    <div class="text-center text-white rounded m-5">
+        <h1 class="m-5 rounded text-center">Bookings</h1>
     </div>
 
     <div class="card-body mt-4 table-responsive">
-        <table class="table table-striped table-hover align-middle">
+        <table class="table table-dark table-hover align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>Name</th>
@@ -34,10 +34,10 @@
                     <td>{{booking.payment_status}}</td>
                     <td>{{booking.trek.status}}</td>
                     <td>{{booking.booking_status}}</td>
-                    {% if booking.booking_status == 'Cancelled' %}
+                    {% if booking.booking_status == 'Cancelled' or booking.booking_status == 'completed' or booking.trek.status == 'Cancelled'%}
                     <td>No actions</td>
                     {% else %}
-                    <td><a href="{{url_for('cancel_booking', booking_id=booking.id)}}" class="btn btn-primary">Cancel</a></td>
+                    {% if booking.booking_status != 'Cancelled' %}<td><a href="{{url_for('cancel_booking', booking_id=booking.id)}}" class="btn btn-primary">Cancel</a>{%else%}Trek was removed{% endif %}</td>
                     {% endif %}
                 </tr>
                 {% endfor %}

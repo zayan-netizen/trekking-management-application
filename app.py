@@ -255,6 +255,7 @@ def blacklist_user(user_id):
     flash("User has been blacklisted successfully.!", 'success')
     return redirect(url_for('manage_users'))
 
+#Unblacklist a user.
 @app.route("/unblacklist_user/<int:user_id>", methods=["POST"])
 def unblacklist_user(user_id):
     user = User.query.get_or_404(user_id)
@@ -263,12 +264,13 @@ def unblacklist_user(user_id):
     flash("User has been unblacklisted successfully.!", 'success')
     return redirect(url_for('manage_users'))
 
+#View users Profile
 @app.route("/view_user/<int:user_id>", methods=["GET"])
 def view_user(user_id):
     curr_user = User.query.get_or_404(user_id)
     user = db.session.get(User, session["user_id"])
     bookings = Booking.query.filter_by(user_id=user_id).all()
-    return render_template("admin/view_user.html", user=user, curr_user=curr_user)
+    return render_template("admin/view_user.html", user=user, curr_user=curr_user, bookings=bookings)
 
 #Renders Staffs Approved Page
 @app.route("/manage_staff_approved", methods=["GET"])
@@ -318,18 +320,21 @@ def blacklist_staff(staff_id):
     db.session.commit()
     return redirect(url_for('manage_staff_pending'))
 
+#To view a staffs profile.
 @app.route("/view_staff/<int:staff_id>", methods=["GET"])
 def view_staff(staff_id):
     staff = User.query.get_or_404(staff_id)
     user = db.session.get(User, session["user_id"])
     return render_template("admin/view_staff.html", user=user, staff=staff)
 
+#Renders all the treks, and to edit it.
 @app.route("/add_edit_treks", methods=["POST", "GET"])
 def add_edit_treks():
     user = db.session.get(User, session["user_id"])
     treks = Trek.query.all()
     return render_template("admin/add_edit_treks.html", user=user, treks=treks)
-    
+
+#Add Trek
 @app.route("/add_trek", methods=["GET", "POST"])
 def add_trek():
     user = db.session.get(User, session["user_id"])
@@ -381,12 +386,14 @@ def add_trek():
     
     return render_template("admin/add_trek.html", user=user, staffs=staffs, trek=None)
 
+#View Trek
 @app.route("/view_trek/<int:trek_id>", methods=["GET"])
 def view_trek(trek_id):
     trek = Trek.query.get_or_404(trek_id)
     user = db.session.get(User, session["user_id"])
     return render_template("admin/view_trek.html", user=user, trek=trek)
 
+#To edit a trek.
 @app.route("/edit_trek/<int:trek_id>", methods=["POST", "GET"])
 def edit_trek(trek_id):
     staffs = User.query.filter_by(role='Trek Staff', status='Approved').all()
@@ -416,6 +423,7 @@ def edit_trek(trek_id):
     
     return render_template("admin/add_trek.html", trek=trek, user=user, trek_name=trek.trek_name, location=trek.location, description=trek.description, total_slots=trek.total_slots, start_date=trek.start_date, end_date=trek.end_date, meeting_point=trek.meeting_point, price=trek.price, staff_id=trek.staff_id, staffs=staffs)
 
+#To remove a trek.
 @app.route("/remove_trek/<int:trek_id>", methods=["POST", "GET"])
 def remove_trek(trek_id):
     user = db.session.get(User, session["user_id"])
@@ -424,23 +432,19 @@ def remove_trek(trek_id):
     db.session.commit()
     return redirect(url_for('add_edit_treks'))
 
-#Booking
+#Show all bookings
 @app.route("/bookings", methods=["POST", "GET"])
 def bookings():
     user = db.session.get(User, session["user_id"])
     bookings_ = Booking.query.all()
     return render_template("admin/bookings.html", user=user, bookings_=bookings_)
 
+#View the details of a booking
 @app.route("/view_booking/<int:booking_id>", methods=["GET"])
 def view_booking(booking_id):
     user = db.session.get(User, session["user_id"])
     booking = Booking.query.get_or_404(booking_id)
     return render_template("admin/view_booking.html", user=user, booking=booking)
-
-@app.route("/reports", methods=["POST", "GET"])
-def reports():
-    user = db.session.get(User, session["user_id"])
-    return render_template("admin/add_edit_treks.html", user=user)
 
 '''Staff Dashboard'''
 @app.route("/staff_dashboard", methods=["POST", "GET"])
@@ -461,7 +465,7 @@ def staff_dashboard():
 
     return render_template("staff/staff_dashboard.html", user=user, registered_count=registered_count, assigned_trek_count=len(assigned_treks), treks=assigned_treks, users=users)
     
-
+#It shows all the treks assgined to that staff.
 @app.route("/my_treks", methods=["POST", "GET"])
 def my_treks():
     user = db.session.get(User, session["user_id"])
@@ -470,7 +474,7 @@ def my_treks():
 
     return render_template("staff/my_treks.html", user=user, treks=treks)
 
-
+#It shows all the participants, to that staff, not necessary.
 @app.route("/participants", methods=["POST", "GET"])
 def participants():
     user = db.session.get(User, session["user_id"])
@@ -479,6 +483,7 @@ def participants():
 
     return render_template("staff/participants.html", user=user, bookings=bookings)
 
+#Shows all the participants to the staff of that particular trek
 @app.route("/participants_trek/<int:trek_id>", methods=["GET"])
 def participants_trek(trek_id):
     user = db.session.get(User, session["user_id"])
@@ -498,7 +503,8 @@ def user_dashboard():
     bookings = Booking.query.join(Trek).filter(Trek.status != "Cancelled", Booking.user_id==user.id, Booking.booking_status=="Success", Trek.status != 'completed').all()
 
     return render_template("user/user_dashboard.html", user=user, booking_completed=booking_completed, total_bookings=total_bookings, bookings=bookings)
-    
+
+#Shows all available treks to the user, it also includes a search option to browse treks using trek_name, location or difficulty. 
 @app.route("/browse_tasks", methods=["POST", "GET"])
 def browse_tasks():
     user = db.session.get(User, session["user_id"])
@@ -522,6 +528,7 @@ def browse_tasks():
     
     return render_template("user/browse_tasks.html", user=user, treks=treks)
 
+#To book a trek, it also checks if all slots has been filled, and autoincrements available slots.
 @app.route("/book/<int:trek_id>")
 def book(trek_id):
     user = db.session.get(User, session["user_id"])
@@ -556,19 +563,22 @@ def book(trek_id):
     db.session.commit()
 
     return redirect(url_for('my_bookings'))
-    
+
+#Display bookings that already has been done.
 @app.route("/history", methods=["POST", "GET"])
 def history():
     user = db.session.get(User, session["user_id"])
     bookings = Booking.query.join(Trek).filter(Trek.status == 'completed', Booking.user_id==user.id).all()
     return render_template("user/history.html", user=user, bookings=bookings)
-    
+
+#View all bookings, which are not completed nor cancelled, so basically all valid bookings, which are yet to be done.
 @app.route("/my_bookings", methods=["POST", "GET"])
 def my_bookings():
     user = db.session.get(User, session["user_id"])
     bookings = Booking.query.join(Trek).filter(Booking.user_id==user.id, Trek.status!='completed').all()
     return render_template("user/my_bookings.html", user=user, bookings=bookings)
 
+#Cancel Booking (User)
 @app.route("/cancel_booking/<int:booking_id>", methods=["GET", "POST"])
 def cancel_booking(booking_id):
     booking = Booking.query.filter(Booking.id==booking_id).first()
@@ -581,14 +591,14 @@ def cancel_booking(booking_id):
 
     return redirect(url_for('my_bookings'))
 
+#Search Admin
 @app.route("/search", methods=["GET"])
 def search():
     user = db.session.get(User, session["user_id"])
 
-    query = request.args.get("query", "").strip()
+    query = request.args.get("search_text", "").strip()
     category = request.args.get("category", "all").strip()
 
-    bookings = []
     treks = []
     staffs = []
     users = []
@@ -608,7 +618,7 @@ def search():
                 User.f_name.ilike(f"%{query}%"),
                 User.username.ilike(f"%{query}%")
             )
-        )
+        ).all()
 
     if category == "all" or category == "staff":
         staffs = User.query.filter(
@@ -617,7 +627,7 @@ def search():
                 User.user_id.ilike(f"%{query}%"),
                 User.f_name.ilike(f"%{query}%")
             )
-        )
+        ).all()
 
     return render_template("admin/search.html", user=user, treks=treks, users=users, staffs=staffs)
 
