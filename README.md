@@ -1,16 +1,31 @@
 ### Trekking Management Application
 
-- The Trekking Management Application is being developed as a college project to demonstrate the application of software engineering principles, database management, and web application development. 
+- The Trekking Management Application is being developed as a college project to demonstrate - database management, and web application development. 
 
-##### First UI
+### Running the Application
 
-<img src="static/initial.png" width="50%">
+1. Clone or download this repository.
+2. Open a terminal or Command Prompt and navigate to the project's root directory (the folder containing `app.py`).
+3. Install the required dependencies by running:
 
-- Initial UI in which I used cards for everything, finally removed the cards and it looked better.
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Start the application:
 
-##### Final UI
+   ```bash
+   python app.py
+   ```
+5. Once the server starts, open the URL displayed in the terminal (usually `http://127.0.0.1:5000`) in your web browser.
 
-<img src="static/final.png" width="50%">
+#### Default Admin Credentials
+
+The application comes with a pre-configured administrator account:
+
+* **Username:** `akzayan8`
+* **Password:** `akzayan8`
+
+- You could change the password and username, by changing the file `create_admin.py`, mainly the part username and password.(Warning: You have to `delete the instance folder` if you ran the program once, for the changed credentials to work, you would also lose the data you inserted before.)
 
 #### Problems I faced
 
@@ -22,3 +37,14 @@
 
 - Overall I had faced a lot of issues in configuaring pages which were shared by both admin and staff, it gave me a lot of errors.
 
+#### Improvements
+
+##### First UI
+
+<img src="static/initial.png" width="50%">
+
+- Initial UI in which I used cards for everything, finally removed the cards and it looked better.
+
+##### Final UI
+
+<img src="static/final.png" width="50%">

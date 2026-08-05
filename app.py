@@ -6,7 +6,7 @@
 #Imports
 from flask import Flask, redirect, url_for, render_template, request, flash, session
 from models.model import db, User, Trek, Booking, StaffProfile
-from create_admin import create_admin_is_not_created
+from create_admin import create_admin_if_not_created
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
@@ -28,7 +28,7 @@ with app.app_context():
     #Initialize Database
     db.create_all()
     #Create Admin
-    create_admin_is_not_created()
+    create_admin_if_not_created()
     print(f"Database initialised successfully")
 
 #Make the endpoint available to each function at all times.
@@ -419,7 +419,10 @@ def edit_trek(trek_id):
 
         db.session.commit()
 
-        return redirect(url_for("add_edit_treks"))
+        if user.role == "Admin":
+            return redirect(url_for("add_edit_treks"))
+        else:
+            return redirect(url_for("my_treks"))
     
     return render_template("admin/add_trek.html", trek=trek, user=user, trek_name=trek.trek_name, location=trek.location, description=trek.description, total_slots=trek.total_slots, start_date=trek.start_date, end_date=trek.end_date, meeting_point=trek.meeting_point, price=trek.price, staff_id=trek.staff_id, staffs=staffs)
 
@@ -446,6 +449,54 @@ def view_booking(booking_id):
     booking = Booking.query.get_or_404(booking_id)
     return render_template("admin/view_booking.html", user=user, booking=booking)
 
+#Search Admin
+@app.route("/search", methods=["GET"])
+def search():
+    user = db.session.get(User, session["user_id"])
+
+    query = request.args.get("search_text", "").strip()
+    category = request.args.get("category", "all").strip()
+
+    treks = []
+    staffs = []
+    users = []
+    
+    if category == "all" or category == "trek":
+        treks = Trek.query.filter(
+            or_(
+                Trek.trek_name.ilike(f"%{query}%"),
+                Trek.location.ilike(f"%{query}%")
+            )
+        ).all()
+
+    if category == "all" or category == "user":
+        users = User.query.filter(
+            User.role=='Trekker',
+            or_(
+                User.f_name.ilike(f"%{query}%"),
+                User.username.ilike(f"%{query}%")
+            )
+        ).all()
+
+    if category == "all" or category == "staff":
+        staffs = User.query.filter(
+            User.role == 'Trek Staff',
+            or_(
+                User.user_id.ilike(f"%{query}%"),
+                User.f_name.ilike(f"%{query}%")
+            )
+        ).all()
+
+    return render_template("admin/search.html", user=user, treks=treks, users=users, staffs=staffs)
+
+@app.route("/remove_booking/<string:booking_id>", methods=["POST", "GET"])
+def remove_booking(booking_id):
+    booking = Booking.query.filter_by(booking_number=booking_id).first()
+    if booking:
+        db.session.delete(booking)
+        db.session.commit()
+    return redirect(url_for('bookings'))
+            
 '''Staff Dashboard'''
 @app.route("/staff_dashboard", methods=["POST", "GET"])
 @roles_required("Trek Staff")
@@ -473,15 +524,6 @@ def my_treks():
     treks = Trek.query.filter_by(staff_id=user.id).all()
 
     return render_template("staff/my_treks.html", user=user, treks=treks)
-
-#It shows all the participants, to that staff, not necessary.
-@app.route("/participants", methods=["POST", "GET"])
-def participants():
-    user = db.session.get(User, session["user_id"])
-
-    bookings = (Booking.query.join(Trek).filter(Trek.staff_id == user.id, Booking.booking_status != "Cancelled").all())
-
-    return render_template("staff/participants.html", user=user, bookings=bookings)
 
 #Shows all the participants to the staff of that particular trek
 @app.route("/participants_trek/<int:trek_id>", methods=["GET"])
@@ -591,45 +633,19 @@ def cancel_booking(booking_id):
 
     return redirect(url_for('my_bookings'))
 
-#Search Admin
-@app.route("/search", methods=["GET"])
-def search():
+@app.route("/user_profile", methods=["POST", "GET"])
+def user_profile():
     user = db.session.get(User, session["user_id"])
 
-    query = request.args.get("search_text", "").strip()
-    category = request.args.get("category", "all").strip()
+    if request.method == "POST":
+        user.email = request.form["email"]
+        user.phone = request.form["phone"]
 
-    treks = []
-    staffs = []
-    users = []
-    
-    if category == "all" or category == "trek":
-        treks = Trek.query.filter(
-            or_(
-                Trek.trek_name.ilike(f"%{query}%"),
-                Trek.location.ilike(f"%{query}%")
-            )
-        ).all()
+        db.session.commit()
 
-    if category == "all" or category == "user":
-        users = User.query.filter(
-            User.role=='Trekker',
-            or_(
-                User.f_name.ilike(f"%{query}%"),
-                User.username.ilike(f"%{query}%")
-            )
-        ).all()
+        return redirect(url_for('user_profile'))
 
-    if category == "all" or category == "staff":
-        staffs = User.query.filter(
-            User.role == 'Trek Staff',
-            or_(
-                User.user_id.ilike(f"%{query}%"),
-                User.f_name.ilike(f"%{query}%")
-            )
-        ).all()
-
-    return render_template("admin/search.html", user=user, treks=treks, users=users, staffs=staffs)
+    return render_template("user/profile.html", user=user)
 
 #Profile
 @app.route("/profile", methods=["POST", "GET"])
@@ -668,8 +684,7 @@ def logout():
 #Access Denied Page
 @app.route("/access_denied.html", methods=["GET"])
 def access_denied():
-    if request.method == "GET":
-        return render_template("access_denied.html")
+    return render_template("access_denied.html")
     
 #Runs application
 if __name__ == "__main__":

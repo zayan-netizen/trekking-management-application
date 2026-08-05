@@ -26,7 +26,10 @@
             <p id="booking_status">{{ booking.booking_status }}</p>
         </div>
         <div class="mb-3">
-            <a href="{{url_for('bookings')}}" class="btn btn-primary mx-auto">Manage Bookings</a>
+            <a href="{{url_for('bookings')}}" class="btn btn-primary mx-auto">Go Back</a>
+            <form method="post" action="{{url_for('remove_booking', booking_id=booking.booking_number)}}">
+            <button class="btn btn-danger ms-auto">Remove Booking</button>
+            </form>
         </div>
     </div>
 </div>

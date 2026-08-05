@@ -9,16 +9,16 @@
 
 <body class="bg-dark text-white">
 
-    <header class="border-bottom">
-        <h5 class="m-3 container d-grid">
+    <header class="border-bottom border-white">
+        <h5 class="m-3 text-white">
             Trekking Management Application
         </h5>
     </header>
 
     <main class="container d-flex justify-content-center" style="margin-top: 7rem;">
 
-        <div class="card p-4 shadow" style="width: 500px;">
-            <h2 class="text-center mb-4">Sign in</h2>
+        <div class="card p-4" style="width: 500px;">
+            <h2 class="text-center m-4">Sign in</h2>
 
             <form action="{{ url_for('login') }}" method="POST">
 
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="container mt-3 d-grid">
-                    <button type="submit" class="btn btn-success p-2 m-2">
+                    <button type="submit" class="btn btn-success p-2 m-4">
                         Login
                     </button>
                 </div>

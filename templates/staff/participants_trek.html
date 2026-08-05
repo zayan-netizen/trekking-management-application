@@ -13,6 +13,7 @@
                     <th>Name</th>
                     <th>Contact No.</th>
                     <th>Payment Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
 
@@ -22,10 +23,14 @@
                     <td>{{booking.user.f_name}} {{booking.user.l_name}}</td>
                     <td>{{booking.user.phone}}</td>
                     <td>{{booking.payment_status}}</td>
+                    <td><form method="post" action="{{url_for('remove_booking', booking_id=booking.booking_number)}}">
+            <button class="btn btn-danger ms-auto">Remove Participant</button>
+            </form></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <a href="{{url_for('my_treks')}}" class="btn btn-primary">Go Back</a>
     </div>
 </div>
 

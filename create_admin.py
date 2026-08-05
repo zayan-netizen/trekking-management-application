@@ -2,7 +2,7 @@ from werkzeug.security import generate_password_hash
 
 from models.model import db, User
 
-def create_admin_is_not_created():
+def create_admin_if_not_created():
 
     admin = User.query.filter_by(role="Admin").first()
 

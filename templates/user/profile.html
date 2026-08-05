@@ -1,0 +1,29 @@
+{% extends 'base.html'%}
+{% block title %}View Profile{% endblock %}
+{% block content%}
+
+<div class="card rounded p-2 mx-auto" style="margin-top: 74px; width: 400px;">
+    <div class="card-header rounded p-4 bg-primary">
+        <h1 class="text-center">Profile</h1>
+    </div>
+    <div class="card-body">
+        <h4 class="text-center">{{ user.f_name + " " + user.l_name }} ({{user.role}})</h4>
+    </div>
+    <form method="post">
+    <div class="mb-3">
+        <label for="username">Username:</label>
+        <p id="username" name="username">{{ user.username }}</p>
+    </div>
+    <div class="mb-3">
+        <label for="email">Email:</label>
+        <input id="email" value="{{ user.email }}" name="email" class="form-control" type="email">
+    </div>
+    <div class="mb-3">
+        <label for="phone">Phone:</label>
+        <input name="phone" id="phone" value="{{ user.phone }}" type="telephone" class="form-control" minlength="10" maxlength="10">
+    </div>
+    <button type="submit" class="btn btn-primary">Change Info</button>
+    </form>
+</div>
+
+{% endblock %}

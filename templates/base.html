@@ -50,7 +50,6 @@
                     {% if user.role == 'Trek Staff' %}
                         <a href="{{ url_for('staff_dashboard' )}}" class="nav-link border rounded text-center text-white{% if current_page == 'staff_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
                         <a href="{{ url_for('my_treks') }}" class="nav-link border rounded text-center text-white{% if current_page == 'my_treks' %}active bg-white text-black{%endif%}">Assigned Treks</a>
-                        <a href="{{ url_for('participants') }}" class="nav-link border rounded text-center text-white{% if current_page == 'participants' or current_page == 'participants_trek' %}active bg-white text-black{%endif%}">Participants</a>
                     {% endif %}
                     {% if user.role == 'Trekker' %}
                         <a href="{{ url_for('user_dashboard') }}" class="nav-link border rounded text-center text-white{% if current_page == 'user_dashboard' %}active bg-white text-black{%endif%}">Dashboard</a>
@@ -58,7 +57,7 @@
                         <a href="{{ url_for('my_bookings') }}" class="nav-link border rounded text-center text-white{% if current_page == 'my_bookings' %}active bg-white text-black{%endif%}">My Bookings</a>
                         <a href="{{ url_for('history') }}" class="nav-link border rounded text-center text-white{% if current_page == 'history' %}active bg-white text-black{%endif%}">History</a>
                     {% endif %}
-                        <a href="{{ url_for('profile') }}" class="nav-link border rounded text-center text-white{% if current_page == 'profile' %}active bg-white text-black{%endif%}">Profile</a>        
+                        <a {% if user.role == 'Trekker' %}href="{{ url_for('user_profile')}}"{% else %}href="{{ url_for('profile') }}"{% endif %} class="nav-link border rounded text-center text-white{% if current_page == 'profile' or current_page == 'user_profile'%}active bg-white text-black{%endif%}">Profile</a>        
                         <a href="{{ url_for('logout') }}" class="nav-link border rounded text-center text-white">Logout</a>
                 </nav>
             </div>
