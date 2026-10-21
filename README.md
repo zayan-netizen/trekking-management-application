@@ -1,6 +1,10 @@
 ### Trekking Management Application
 
-- The Trekking Management Application is being developed as a college project to demonstrate - database management, and web application development. 
+- Developed a web application for managing trekking activities as part of the IIT Madras BS Degree MAD1 project.
+- Demonstrated practical skills in database management, backend development, and web application design.
+- Secured an A grade for the project.
+
+<img src="static/Screenshot (240).png" width="50%" style="display: block; margin: auto;">
 
 ### Running the Application
 
